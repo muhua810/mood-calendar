@@ -27,3 +27,15 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: () => false,
   }),
 })
+
+// Mock fetch to prevent real API calls during tests (avoids CI timeouts)
+const originalFetch = globalThis.fetch
+globalThis.fetch = vi.fn(async (url, opts) => {
+  const urlStr = typeof url === 'string' ? url : url?.url || ''
+  // Block Workers AI and external API calls
+  if (urlStr.includes('/api/analyze') || urlStr.includes('api.openai.com') || urlStr.includes('workers.dev')) {
+    throw new Error('fetch blocked in test environment')
+  }
+  // Allow other fetches (if any)
+  return originalFetch?.(url, opts) ?? Promise.reject(new Error('no fetch'))
+})
