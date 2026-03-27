@@ -198,7 +198,7 @@ export default function StatsPage() {
     const avg = Object.entries(source.moods).reduce((sum, [key, count]) => {
       return sum + (MOOD_SCORE_MAP[key] || 3) * count
     }, 0) / (source.total || 1)
-    return { pie, avg: avg.toFixed(1), total: source.total, isLocal: !communityData }
+    return { pie, avg: avg.toFixed(1), total: source.total, isLocal: !communityData, isDemo: communityData?.isDemo || false }
   }, [communityData, stats])
 
   if (!stats) {
@@ -563,7 +563,7 @@ export default function StatsPage() {
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold theme-text flex items-center gap-2">
-                <Users size={14} className="text-cyan-400" /> {communityChartData?.isLocal ? '我的情绪总览' : '本月群体情绪'}
+                <Users size={14} className="text-cyan-400" /> {communityChartData?.isLocal ? '我的情绪总览' : communityChartData?.isDemo ? '群体情绪（演示）' : '本月群体情绪'}
               </h3>
               <button
                 onClick={() => loadCommunityData(true)}
@@ -580,6 +580,11 @@ export default function StatsPage() {
                 {communityChartData.isLocal && (
                   <div className="mb-3 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
                     暂无群体数据，当前展示的是你自己的情绪分布。开启"匿名统计"后可汇聚更多人的数据。
+                  </div>
+                )}
+                {communityChartData.isDemo && !communityChartData.isLocal && (
+                  <div className="mb-3 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300">
+                    📊 当前展示的是模拟群体数据，用于演示统计分析功能。真实使用后将展示实际汇聚数据。
                   </div>
                 )}
                 <div className="flex items-center gap-4 mb-4">
