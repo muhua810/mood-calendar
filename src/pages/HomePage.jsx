@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Plus, CalendarDays, LayoutGrid, Settings, Database } from 'lucide-react'
 import HeatmapCalendar from '../components/HeatmapCalendar'
 import MonthCalendar from '../components/MonthCalendar'
+import MiniTrend from '../components/MiniTrend'
+import KeywordCloud from '../components/KeywordCloud'
 import { getAllRecords, getAllRecordsAsync, saveRecord } from '../services/storage'
 import { MOOD_TYPES } from '../utils/moodUtils'
 import { getLocalDateString } from '../utils/moodUtils'
@@ -196,6 +198,12 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* 迷你7天趋势 */}
+      {!isEmpty && <MiniTrend records={records} />}
+
+      {/* 高频关键词云 */}
+      {!isEmpty && records.length >= 5 && <KeywordCloud records={records} maxWords={20} />}
 
       {/* 热力图/月视图 */}
       <div className="card p-4">

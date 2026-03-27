@@ -1,6 +1,7 @@
 import { MOOD_TYPES } from '../utils/moodUtils'
 import { secureKeyGet } from '../utils/crypto'
 import { getApiBase } from './apiService'
+import { statisticalAnalyze, getModelInfo } from './statisticalAnalyzer'
 
 const MOOD_KEY_MAP = {
   1: 'very_negative',
@@ -400,7 +401,10 @@ async function aiAnalyzeDirect(text) {
 
 /**
  * 分析情绪 - 主入口
- * 优先级：Workers 代理 → 用户自定义 API → 本地关键词
+ * 优先级：Workers 代理 → 用户自定义 API → 本地关键词 → 统计分析器
+ *
+ * 关键词引擎优先：它有完善的否定词、反转模式、分句加权等中文处理逻辑
+ * 统计分析器兜底：在关键词无法匹配时，用 TF-IDF + 朴素贝叶斯提供泛化能力
  * @param {string} text - 用户输入文本
  * @returns {Promise<Object>} 分析结果
  */
@@ -421,10 +425,33 @@ export async function analyzeEmotion(text) {
     console.error('用户自定义 API 分析失败，降级到本地分析:', error.message)
   }
 
-  // 3. 降级到本地关键词分析
+  // 3. 优先使用本地关键词分析（中文处理最完善）
+  const keywordResult = localAnalyze(text)
+
+  // 4. 如果关键词引擎有明确匹配（confidence > 0.5），直接返回
+  // 否则尝试统计分析器作为补充验证
+  if (keywordResult.confidence > 0.5) {
+    console.log('使用本地关键词分析器')
+    return keywordResult
+  }
+
+  // 5. 关键词匹配不明确时，用统计分析器兜底
+  try {
+    const statResult = statisticalAnalyze(text)
+    if (statResult && statResult.confidence > keywordResult.confidence) {
+      console.log('使用统计分析器（TF-IDF + 朴素贝叶斯）作为兜底')
+      return statResult
+    }
+  } catch (error) {
+    console.error('统计分析器失败:', error.message)
+  }
+
   console.log('使用本地关键词分析器')
-  return localAnalyze(text)
+  return keywordResult
 }
+
+// 重新导出统计分析器信息
+export { getModelInfo, learnFromFeedback } from './statisticalAnalyzer'
 
 /**
  * 获取情绪建议
