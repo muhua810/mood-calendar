@@ -97,7 +97,7 @@ export default function RecordPage() {
     try {
       const analysis = await analyzeEmotion(clean)
       setResult(analysis)
-      setEditing(false) // 分析完成后退出编辑模式
+      // 保持 editing=true，让用户能重新保存
     } catch (e) {
       console.error('分析失败:', e)
       setError('分析失败，请稍后重试或手动选择情绪')
