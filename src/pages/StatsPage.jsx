@@ -750,30 +750,39 @@ function AnnualReport({ records, navigate }) {
   })
 
   // 年度关键词云（从记录中提取关键词并统计频率）
+  const ANNUAL_STOP_WORDS = new Set([
+    '的', '了', '在', '是', '我', '有', '和', '就', '不', '人', '都', '一',
+    '一个', '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有',
+    '看', '好', '自己', '这', '他', '她', '它', '们', '那', '些', '什么', '怎么',
+    '还是', '因为', '所以', '但是', '然后', '如果', '虽然', '今天', '感觉',
+    '觉得', '有点', '真的', '可以', '已经', '没有', '不是', '不想', '不过',
+    '一直', '一下', '一些', '这些', '那些', '这样', '那样', '这么', '那么',
+    '一天', '一次', '一样', '一点', '一段', '一件', '一场', '一种',
+  ])
+
+  const extractAnnualKeywords = (text) => {
+    if (!text) return []
+    const cleanText = text.replace(/[^\u4e00-\u9fff\uf900-\ufaffa-zA-Z]/g, ' ')
+    return cleanText.split(/\s+/).filter(s => s.length >= 2 && s.length <= 6 && !ANNUAL_STOP_WORDS.has(s))
+  }
+
   const keywordFreq = {}
   yearRecords.forEach(r => {
-    if (Array.isArray(r.keywords)) {
+    // 优先使用情绪分析器返回的关键词
+    if (Array.isArray(r.keywords) && r.keywords.length > 0) {
       r.keywords.forEach(kw => {
-        if (kw && kw.length <= 10) {
+        if (kw && kw.length >= 2 && kw.length <= 10 && !ANNUAL_STOP_WORDS.has(kw)) {
           keywordFreq[kw] = (keywordFreq[kw] || 0) + 1
         }
       })
     }
-  })
-  // 如果没有关键词数据，从文本中提取常见字词
-  const hasKeywords = Object.keys(keywordFreq).length > 0
-  if (!hasKeywords) {
-    yearRecords.forEach(r => {
-      if (r.text) {
-        // 简单提取：取前4个字作为"关键词"
-        const short = r.text.slice(0, 6)
-        if (short.length >= 2) {
-          keywordFreq[short] = (keywordFreq[short] || 0) + 1
-        }
-      }
+    // 同时从文本中提取内容关键词
+    extractAnnualKeywords(r.text).forEach(w => {
+      keywordFreq[w] = (keywordFreq[w] || 0) + 1
     })
-  }
+  })
   const sortedKeywords = Object.entries(keywordFreq)
+    .filter(([, count]) => count >= 2)
     .sort(([,a],[,b]) => b - a)
     .slice(0, 20)
 
