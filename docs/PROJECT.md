@@ -1,6 +1,6 @@
 # 情绪日历 — 项目说明书
 
-> **当前版本**: v1.9.1 | **更新日期**: 2026-03-27
+> **当前版本**: v1.9.2 | **更新日期**: 2026-03-27
 
 ## 一、选题背景与意义
 
@@ -101,7 +101,7 @@
 - **路由**: React Router v7
 - **样式**: TailwindCSS v4
 - **数据可视化**: 自研 SVG 情绪热力图（年视图 + 月视图）+ Recharts 统计图表（饼图/面积图/柱状图/关键词云）
-- **AI 分析**: Workers AI 代理（DeepSeek）+ 本地关键词匹配（140+ 关键词 + Emoji + 分句加权）+ OpenAI 兼容 API（可选），三级降级策略
+- **AI 分析**: Workers AI 代理（DeepSeek）+ 本地关键词匹配（140+ 关键词 + Emoji + 分句加权）+ OpenAI 兼容 API（可选），三级降级策略 + 反讽检测 + 网络用语
 - **后端服务**: Cloudflare Workers + KV（AI 代理 + 匿名情绪统计 API，边缘计算）
 - **数据存储**: LocalStorage + AES-256-GCM 加密（主数据）+ Cloudflare KV（匿名统计聚合）
 - **PWA**: Service Worker（stale-while-revalidate 策略）+ Web App Manifest
@@ -109,7 +109,7 @@
 
 ### 3.2 AI 分析策略
 
-采用**三级降级策略**：
+采用**三级降级策略 + 反讽检测 + 网络用语**：
 1. **Workers AI 代理（默认）**：通过 Cloudflare Workers 转发到 DeepSeek API，用户无需配置即可使用 AI
 2. **用户自定义 API**：如果用户配置了 API Key，使用用户自己的 OpenAI 兼容 API
 3. **本地关键词分析（兜底）**：140+ 关键词 + 29 否定词 + Emoji 映射（50+ emoji）+ 分句加权（"虽然...但是..."后半句优先），50ms 内响应
