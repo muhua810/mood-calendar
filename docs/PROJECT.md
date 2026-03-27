@@ -23,7 +23,7 @@
 ### 1.3 创新意义
 
 - **轻量化入口**：每天只需写一句话，零负担建立记录习惯
-- **AI 三级分析**：Workers AI 代理（DeepSeek）+ 140+ 关键词引擎 + 29+ 否定词识别 + Emoji 情绪映射 + 分句加权分析，零配置即可使用
+- **AI 四级分析**：Workers AI 代理（DeepSeek）+ 140+ 关键词引擎 + 29+ 否定词识别 + Emoji 情绪映射 + 分句加权分析，零配置即可使用
 - **视觉驱动**：GitHub 贡献图风格热力图，年/月双视图切换
 - **隐私优先**：纯前端应用 + 可选匿名统计，用户完全掌控数据
 - **低落预警**：连续 3 天负面情绪自动触发关怀提示 + 心理援助热线
@@ -36,7 +36,7 @@
 #### 📝 每日情绪记录
 用户用一句话描述今日感受，支持中文自然语言输入。支持 Ctrl+Enter 快捷键提交分析。输入内容使用 DOMPurify 彻底过滤 HTML/脚本标签，同时移除零宽字符和控制字符，防止 XSS 攻击。记录页支持日期前后切换，方便补记或修改历史记录。**首页"修改"按钮自动进入编辑模式**，无需翻到底部寻找编辑键。
 
-#### 🤖 AI 情绪分析（三级降级）
+#### 🤖 AI 情绪分析（四级降级）
 1. **Workers AI 代理（默认）**：通过 Cloudflare Workers 转发到 DeepSeek API，用户无需配置即可使用 AI 分析
 2. **本地关键词分析**：基于 140+ 关键词库 + 29 个否定词识别 + 相对化表达弱化 + Emoji 情绪映射（50+ emoji）+ 分句加权分析（"虽然...但是..."后半句权重更高），无需网络，响应即时
 3. **用户自定义 API（可选）**：通过 OpenAI 兼容 API 实现更精准的语义分析
@@ -97,61 +97,32 @@
 ## 三、技术方案
 
 ### 3.1 技术架构
-- **前端框架**: React 19 + Vite 8
-- **路由**: React Router v7
-- **样式**: TailwindCSS v4
-- **数据可视化**: 自研 SVG 情绪热力图（年视图 + 月视图）+ Recharts 统计图表（饼图/面积图/柱状图/关键词云）
-- **AI 分析**: Workers AI 代理（DeepSeek）+ 本地关键词匹配（140+ 关键词 + Emoji + 分句加权）+ OpenAI 兼容 API（可选），三级降级策略 + 反讽检测 + 网络用语
-- **后端服务**: Cloudflare Workers + KV（AI 代理 + 匿名情绪统计 API，边缘计算）
-- **数据存储**: LocalStorage + AES-256-GCM 加密（主数据）+ Cloudflare KV（匿名统计聚合）
-- **PWA**: Service Worker（stale-while-revalidate 策略）+ Web App Manifest
-- **测试**: Vitest + Testing Library + V8 Coverage（130+ 单元测试，含组件测试）
 
-### 3.2 AI 分析策略
+| 层面 | 技术 | 说明 |
+|------|------|------|
+| 前端 | React 19 + Vite 8 + Tailwind CSS v4 | 最新技术栈 |
+| 路由 | React Router v7 | 懒加载 + 代码分割 |
+| 图表 | 自研 SVG 热力图 + Recharts | 零依赖热力图 + 丰富图表 |
+| AI | 四级降级策略 | Workers AI → 用户 API → 关键词引擎 → 统计分析器 |
+| 后端 | Cloudflare Workers + KV | 边缘计算 + 全球分发 |
+| 安全 | Web Crypto API (AES-256-GCM) | 浏览器原生加密 |
+| 测试 | Vitest + Testing Library | 130+ 用例 |
 
-采用**三级降级策略 + 反讽检测 + 网络用语**：
-1. **Workers AI 代理（默认）**：通过 Cloudflare Workers 转发到 DeepSeek API，用户无需配置即可使用 AI
-2. **用户自定义 API**：如果用户配置了 API Key，使用用户自己的 OpenAI 兼容 API
-3. **本地关键词分析（兜底）**：140+ 关键词 + 29 否定词 + Emoji 映射（50+ emoji）+ 分句加权（"虽然...但是..."后半句优先），50ms 内响应
-4. AI 返回内容经过 JSON 解析容错（支持 markdown 代码块包裹）和字段校验
-5. 用户也可跳过分析，直接手动选择情绪
-
-### 3.3 隐私保护
+### 3.2 隐私保护
 - 所有数据存储在用户设备本地（LocalStorage），支持 AES-256-GCM 加密存储
 - 匿名统计仅提交情绪类型和日期（不含文字），用户可随时关闭
 - 不收集任何个人信息，无需注册账号
-- AI 分析默认通过 Workers 代理（API Key 安全存储在 Workers 环境变量中，不暴露给前端）；用户也可配置自己的 API（Key 使用 AES-256-GCM 加密存储）
+- AI 分析默认通过 Workers 代理（API Key 安全存储在 Workers 环境变量中，不暴露给前端）
 - 用户可随时导出、导入和删除所有数据
-- Cloudflare Workers 后端无用户标识，无法追踪个人
 
-### 3.4 PWA 与离线支持
-- 注册 Service Worker 实现离线缓存
-- **stale-while-revalidate 策略**：静态资源优先从缓存读取，后台更新
-- **Network First 策略**：导航请求优先走网络，失败时回退到缓存的 index.html
-- Web App Manifest 支持安装到桌面
-- 核心功能完全离线可用
-
-### 3.5 无障碍设计
-- 语义化 HTML（section、nav、main 等）
-- ARIA 标签（aria-label、aria-current、aria-live、role 等）
-- 键盘可操作（所有交互元素支持 Tab 聚焦 + Enter 操作）
-- 跳转到主要内容链接（skip navigation）
-- 尊重 prefers-reduced-motion 系统设置
-- 错误状态使用 role="alert"
-- 热力图格子支持键盘导航和屏幕阅读器
-
-### 3.6 测试策略
-- 使用 Vitest + Testing Library 进行单元测试
-- V8 Coverage 覆盖率报告，阈值设定 70%
-- 覆盖核心业务逻辑：情绪类型定义、存储服务、情绪分析算法（含分句加权、Emoji、反转模式）、API 服务、提醒服务、Demo 数据生成
-- 测试关注点：边界条件、错误处理、数据完整性、网络降级、否定词检测（远非/算不得）、混合情绪（虽然...但是...）
+> 📖 **详细技术文档**：[TECHNICAL.md](TECHNICAL.md) — 包含情绪分析算法详解、存储架构、PWA 实现、安全设计、无障碍实现等完整技术细节。
 - 130+ 个测试用例全部通过（含 HomePage 和 RecordPage 前端组件测试）
 
 ## 四、作品特色
 
 1. **解决真问题**：针对大学生心理健康管理的痛点，低落预警 + 心理援助热线
 2. **技术创新**：GitHub 贡献图风格情绪热力图，自研 SVG 组件，年/月双视图
-3. **三级 AI 分析**：Workers AI 代理（DeepSeek）+ 140+ 关键词引擎 + Emoji 情绪映射 + 分句加权 + 29 否定词识别，零配置可用
+3. **四级 AI 分析**：Workers AI 代理（DeepSeek）+ 140+ 关键词引擎 + Emoji 情绪映射 + 分句加权 + 29 否定词识别，零配置可用
 4. **前后端协作**：Cloudflare Workers 边缘计算后端 + KV 存储，AI 代理 + 匿名群体情绪统计
 5. **隐私优先**：纯前端核心数据，匿名统计可选可关，用户完全掌控
 6. **即开即用**：无需注册，无需安装，打开即用

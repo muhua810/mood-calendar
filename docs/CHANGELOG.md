@@ -124,7 +124,7 @@
 
 ### 🤖 内置 AI 分析（零配置可用）
 - **Workers AI 代理**：新增 `POST /api/analyze` 端点，通过 Cloudflare Workers 转发到 DeepSeek API
-- **三级降级策略**：Workers 代理 → 用户自定义 API → 本地关键词分析，用户无需配置即可使用 AI
+- **四级降级策略**：Workers 代理 → 用户自定义 API → 本地关键词分析，用户无需配置即可使用 AI
 - **安全设计**：AI API Key 存储在 Workers 环境变量（wrangler secret），不暴露给前端
 - 用户仍可在设置中配置自己的 API Key 覆盖默认
 
