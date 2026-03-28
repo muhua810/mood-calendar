@@ -275,7 +275,7 @@ export default function HeatmapCalendar({ records = [], year: initialYear, onDay
             >
               <ChevronLeft size={16} />
             </button>
-            <span className="text-sm font-medium theme-text">{year}/span>
+            <span className="text-sm font-medium theme-text">{year}</span>
             <button
               onClick={() => setYear(y => Math.min(y + 1, currentYear))}
               disabled={year >= currentYear}

@@ -675,8 +675,8 @@ export default function StatsPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-2xl font-bold theme-text">{communityChartData.avg}<span className="text-sm font-normal theme-text-tertiary">/5</span></p>
-                    <p className="text-xs theme-text-tertiary">{communityChartData.isLocal ? '{t('stats.myAvg')}' : '{t('stats.communityAvg')}'}</p>
-                    <p className="text-xs theme-text-muted mt-1">{communityChartData.total} {communityChartData.isLocal ? '{t('stats.records')}' : '{t('stats.communityPeople')}'}</p>
+                    <p className="text-xs theme-text-tertiary">{communityChartData.isLocal ? t('stats.myAvg') : t('stats.communityAvg')}</p>
+                    <p className="text-xs theme-text-muted mt-1">{communityChartData.total} {communityChartData.isLocal ? t('stats.records') : t('stats.communityPeople')}</p>
                   </div>
                 </div>
                 <div className="space-y-2">

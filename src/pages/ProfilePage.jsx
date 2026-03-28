@@ -400,7 +400,6 @@ export default function ProfilePage() {
             }`}
           >
             {importResult.success ? (importResult.skipped > 0 ? t('data.importSuccessSkipped').replace('{imported}', importResult.imported).replace('{skipped}', importResult.skipped) : t('data.importSuccess').replace('{imported}', importResult.imported)) : t('data.importFail') + importResult.error}
-              : t('data.importFail') + importResult.error}
           </div>
         )}
 
@@ -499,7 +498,7 @@ export default function ProfilePage() {
         </div>
         <p className="text-xs theme-text-tertiary mb-4">
           {t('settings.dailyReminderDesc')}
-          {!notifSupported && ' {t('settings.noBrowserNotif')}'}
+          {!notifSupported && <span className='text-xs text-yellow-400/80'>{t('settings.noBrowserNotif')}</span>}
         </p>
 
         <div className="space-y-3">
