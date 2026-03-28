@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from 'react'
 import { format, startOfYear, endOfYear, eachDayOfInterval, addDays, startOfWeek, getMonth } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { getMoodColor } from '../utils/moodUtils'
+import { getMoodColor, getMoodLabel } from '../utils/moodUtils'
 import { t } from '../i18n'
 
 // 响应式媒体查询 hook
@@ -78,7 +78,7 @@ function HeatmapCell({
   cellX, cellY, svgWidth, cellSize: cs, totalSize: ts, hitSize: hs, hitOffset: ho,
   onHover, onBlur, onClick,
 }) {
-  const moodLabel = record?.moodLabel || t('heatmap.unrecorded')
+  const moodLabel = record ? getMoodLabel(record.mood) : t('heatmap.unrecorded')
   const displayDate = format(day, 'M/d')
   const isActive = isHovered || isSelected
 

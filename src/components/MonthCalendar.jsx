@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isToday, isFuture, getDay } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { getMoodColor, MOOD_TYPES } from '../utils/moodUtils'
+import { getMoodColor, MOOD_TYPES, getMoodLabel } from '../utils/moodUtils'
 import { t } from '../i18n'
 
 const getWeekdays = () => t('heatmap.weekdays').split(',')
@@ -133,7 +133,7 @@ export default function MonthCalendar({ records = [], onDayClick }) {
         {Object.values(MOOD_TYPES).map(m => (
           <div key={m.key} className="flex items-center gap-1">
             <span className="text-xs">{m.emoji}</span>
-            <span className="text-[10px] theme-text-tertiary">{m.label}</span>
+            <span className="text-[10px] theme-text-tertiary">{getMoodLabel(m.key)}</span>
           </div>
         ))}
       </div>

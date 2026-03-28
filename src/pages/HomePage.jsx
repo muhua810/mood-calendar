@@ -7,7 +7,7 @@ import MonthCalendar from '../components/MonthCalendar'
 import MiniTrend from '../components/MiniTrend'
 import KeywordCloud from '../components/KeywordCloud'
 import { getAllRecords, getAllRecordsAsync, saveRecord } from '../services/storage'
-import { MOOD_TYPES } from '../utils/moodUtils'
+import { MOOD_TYPES, getMoodLabel } from '../utils/moodUtils'
 import { getLocalDateString } from '../utils/moodUtils'
 import { fetchMoodSummary } from '../services/apiService'
 import { generateDemoData, shouldAutoImportDemo } from '../services/demoData'
@@ -226,7 +226,7 @@ export default function HomePage() {
               {todayRecord ? t('home.recordedToday') : t('home.howFeeling')}
             </p>
             <p className="text-xs theme-text-tertiary mt-0.5">
-              {todayRecord ? todayRecord.moodLabel : t('home.oneLineHint')}
+              {todayRecord ? getMoodLabel(todayRecord.mood) : t('home.oneLineHint')}
             </p>
           </div>
           <button
@@ -435,7 +435,7 @@ export default function HomePage() {
                 <span className="text-lg">{MOOD_TYPES[r.mood]?.emoji}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm theme-text truncate">{truncate(r.text)}</p>
-                  <p className="text-xs theme-text-tertiary">{r.date} · {r.moodLabel}</p>
+                  <p className="text-xs theme-text-tertiary">{r.date} · {getMoodLabel(r.mood)}</p>
                 </div>
               </button>
             ))}

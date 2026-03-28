@@ -1,4 +1,14 @@
+import { t } from '../i18n'
+
 // 情绪类型定义 — 丰富色彩 + 渐变
+const MOOD_I18N_KEYS = {
+  very_negative: 'mood.very_negative',
+  negative: 'mood.negative',
+  neutral: 'mood.neutral',
+  positive: 'mood.positive',
+  very_positive: 'mood.very_positive',
+}
+
 export const MOOD_TYPES = {
   very_negative: {
     key: 'very_negative',
@@ -80,6 +90,12 @@ export function getMoodColorLight(moodKey) {
 // 获取情绪对应的 CSS 类
 export function getMoodBgClass(moodKey) {
   return MOOD_TYPES[moodKey]?.bgClass || 'bg-slate-800/30 border-slate-700/30'
+}
+
+// 获取情绪的多语言标签
+export function getMoodLabel(moodKey) {
+  const i18nKey = MOOD_I18N_KEYS[moodKey]
+  return i18nKey ? t(i18nKey) : (MOOD_TYPES[moodKey]?.label || moodKey)
 }
 
 // 获取所有情绪类型列表

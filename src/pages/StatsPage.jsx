@@ -6,7 +6,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area, Legend
 } from 'recharts'
-import { MOOD_TYPES, formatIntensityStars } from '../utils/moodUtils'
+import { MOOD_TYPES, formatIntensityStars, getMoodLabel } from '../utils/moodUtils'
 import { getAllRecords, getAllRecordsAsync, getStreakDays, getMaxStreak } from '../services/storage'
 import { fetchMoodSummary } from '../services/apiService'
 import { generateDemoData } from '../services/demoData'
@@ -405,7 +405,7 @@ export default function StatsPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm theme-text truncate">{r.text}</p>
                     <p className="text-xs theme-text-tertiary">
-                      {formatDateLocalized(parseISO(r.date), 'short')} · {r.moodLabel}
+                      {formatDateLocalized(parseISO(r.date), 'short')} · {getMoodLabel(r.mood)}
                     </p>
                   </div>
                 </div>
