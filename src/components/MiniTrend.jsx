@@ -22,24 +22,25 @@ export default function MiniTrend({ records }) {
       const rec = records.find(r => r.date === d)
       data.push({
         date: format(subDays(new Date(), i), 'M/d'),
+        weekday: format(subDays(new Date(), i), 'EEE'),
         score: rec ? (MOOD_TYPES[rec.mood]?.intensity || 0) : null,
         mood: rec?.mood || null,
-        label: format(subDays(new Date(), i), 'EEE', { locale: undefined }),
+        emoji: rec ? (MOOD_TYPES[rec.mood]?.emoji || '') : '',
+        text: rec?.text || '',
       })
     }
     return data
   }, [records])
 
-  // 计算 SVG 路径
-  const { pathD, dots, hasData } = useMemo(() => {
-    const width = 280
-    const height = 48
-    const padding = { top: 8, bottom: 8, left: 12, right: 12 }
+  const { pathD, areaD, movingAvgD, dots, hasData } = useMemo(() => {
+    const width = 320
+    const height = 80
+    const padding = { top: 14, bottom: 18, left: 16, right: 16 }
     const innerW = width - padding.left - padding.right
     const innerH = height - padding.top - padding.bottom
 
     const validData = trendData.filter(d => d.score !== null)
-    if (validData.length < 2) return { pathD: '', dots: [], hasData: false }
+    if (validData.length < 2) return { pathD: '', areaD: '', movingAvgD: '', dots: [], hasData: false }
 
     const points = trendData.map((d, i) => {
       const x = padding.left + (i / 6) * innerW
@@ -47,10 +48,9 @@ export default function MiniTrend({ records }) {
       return { x, y, ...d }
     })
 
-    // 构建平滑路径（仅连接有数据的点）
+    // 主曲线路径
     let path = ''
     const validPoints = points.filter(p => p.y !== null)
-
     if (validPoints.length >= 2) {
       path = `M ${validPoints[0].x} ${validPoints[0].y}`
       for (let i = 1; i < validPoints.length; i++) {
@@ -61,11 +61,31 @@ export default function MiniTrend({ records }) {
       }
     }
 
-    return {
-      pathD: path,
-      dots: validPoints,
-      hasData: true,
+    // 填充区域
+    const areaPath = path && validPoints.length >= 2
+      ? path + ` L ${validPoints[validPoints.length - 1].x} ${height - padding.bottom} L ${validPoints[0].x} ${height - padding.bottom} Z`
+      : ''
+
+    // 3日移动平均线
+    let movingAvgPath = ''
+    if (validPoints.length >= 3) {
+      const maPoints = []
+      for (let i = 0; i <= validPoints.length - 3; i++) {
+        const avg = (validPoints[i].y + validPoints[i + 1].y + validPoints[i + 2].y) / 3
+        maPoints.push({ x: validPoints[i + 1].x, y: avg })
+      }
+      if (maPoints.length >= 2) {
+        movingAvgPath = `M ${maPoints[0].x} ${maPoints[0].y}`
+        for (let i = 1; i < maPoints.length; i++) {
+          const prev = maPoints[i - 1]
+          const curr = maPoints[i]
+          const cpx = (prev.x + curr.x) / 2
+          movingAvgPath += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`
+        }
+      }
     }
+
+    return { pathD: path, areaD: areaPath, movingAvgD: movingAvgPath, dots: validPoints, hasData: true }
   }, [trendData])
 
   if (!hasData) {
@@ -84,75 +104,98 @@ export default function MiniTrend({ records }) {
   const prevAvg = prev3.length ? prev3.reduce((s, d) => s + d.score, 0) / prev3.length : 0
   let trendText = ''
   let trendColor = 'theme-text-tertiary'
-  if (recentAvg > prevAvg + 0.3) {
-    trendText = '📈 心情在变好'
-    trendColor = 'text-green-400'
-  } else if (recentAvg < prevAvg - 0.3) {
-    trendText = '📉 最近有些低落'
-    trendColor = 'text-orange-400'
-  } else {
-    trendText = '➡️ 心情比较平稳'
-    trendColor = 'theme-text-tertiary'
-  }
+  if (recentAvg > prevAvg + 0.3) { trendText = '📈 心情在变好'; trendColor = 'text-green-400' }
+  else if (recentAvg < prevAvg - 0.3) { trendText = '📉 最近有些低落'; trendColor = 'text-orange-400' }
+  else { trendText = '➡️ 心情比较平稳'; trendColor = 'theme-text-tertiary' }
+
+  // 统计有记录天数
+  const recordDays = trendData.filter(d => d.score !== null).length
 
   return (
     <div className="card p-4 mb-4">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-1">
         <h2 className="text-sm font-semibold theme-text">近7天趋势</h2>
         <span className={`text-xs ${trendColor}`}>{trendText}</span>
       </div>
+      <p className="text-[10px] theme-text-muted mb-3">最近7天记录了 {recordDays} 天</p>
 
-      {/* SVG 趋势线 */}
+      {/* SVG 趋势图 */}
       <div className="flex justify-center">
-        <svg width="280" height="48" viewBox="0 0 280 48" className="overflow-visible">
-          {/* 水平参考线 */}
-          <line x1="12" y1="44" x2="268" y2="44" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-          <line x1="12" y1="24" x2="268" y2="24" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="4 4" />
-          <line x1="12" y1="8" x2="268" y2="8" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+        <svg width="320" height="80" viewBox="0 0 320 80" className="overflow-visible">
+          {/* 背景情绪区间 */}
+          <rect x="16" y="14" width="288" height="48" rx="4" fill="rgba(34,197,94,0.03)" />
+          <rect x="16" y="38" width="288" height="24" rx="0" fill="rgba(234,179,8,0.03)" />
+          <rect x="16" y="52" width="288" height="10" rx="0" fill="rgba(239,68,68,0.03)" />
 
-          {/* 渐变填充 */}
+          {/* 水平参考线 */}
+          <line x1="16" y1="14" x2="304" y2="14" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+          <line x1="16" y1="38" x2="304" y2="38" stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4 4" />
+          <line x1="16" y1="50" x2="304" y2="50" stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4 4" />
+          <line x1="16" y1="62" x2="304" y2="62" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+
+          {/* 渐变定义 */}
           <defs>
             <linearGradient id="miniTrendGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c084fc" stopOpacity="0.2" />
-              <stop offset="100%" stopColor="#c084fc" stopOpacity="0" />
+              <stop offset="0%" stopColor="#c084fc" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#c084fc" stopOpacity="0.02" />
+            </linearGradient>
+            <linearGradient id="miniLineGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#a78bfa" />
+              <stop offset="100%" stopColor="#f472b6" />
             </linearGradient>
           </defs>
 
           {/* 填充区域 */}
-          {pathD && (
+          {areaD && <path d={areaD} fill="url(#miniTrendGrad)" />}
+
+          {/* 移动平均线（虚线） */}
+          {movingAvgD && (
             <path
-              d={pathD + ` L ${dots[dots.length - 1].x} 44 L ${dots[0].x} 44 Z`}
-              fill="url(#miniTrendGrad)"
+              d={movingAvgD}
+              fill="none"
+              stroke="rgba(255,255,255,0.15)"
+              strokeWidth="1.5"
+              strokeDasharray="4 3"
+              strokeLinecap="round"
             />
           )}
 
-          {/* 趋势线 */}
+          {/* 主趋势线（渐变色） */}
           {pathD && (
             <path
               d={pathD}
               fill="none"
-              stroke="#c084fc"
-              strokeWidth="2"
+              stroke="url(#miniLineGrad)"
+              strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           )}
 
-          {/* 数据点 */}
+          {/* 数据点 + emoji 标签 */}
           {dots.map((dot, i) => (
             <g key={i}>
+              {/* 光晕 */}
               <circle
                 cx={dot.x}
                 cy={dot.y}
-                r="4"
+                r="7"
                 fill={MOOD_COLORS[dot.mood] || '#c084fc'}
-                stroke="rgba(0,0,0,0.3)"
-                strokeWidth="1"
+                opacity="0.15"
+              />
+              {/* 实心点 */}
+              <circle
+                cx={dot.x}
+                cy={dot.y}
+                r="3.5"
+                fill={MOOD_COLORS[dot.mood] || '#c084fc'}
+                stroke="var(--theme-bg)"
+                strokeWidth="1.5"
               />
               {/* 日期标签 */}
               <text
                 x={dot.x}
-                y="48"
+                y="76"
                 textAnchor="middle"
                 fontSize="8"
                 fill="rgba(255,255,255,0.3)"
@@ -160,8 +203,24 @@ export default function MiniTrend({ records }) {
               >
                 {dot.date}
               </text>
+              {/* emoji 标签（在点上方） */}
+              {dot.emoji && (
+                <text
+                  x={dot.x}
+                  y={dot.y - 10}
+                  textAnchor="middle"
+                  fontSize="10"
+                  dominantBaseline="auto"
+                >
+                  {dot.emoji}
+                </text>
+              )}
             </g>
           ))}
+
+          {/* 左侧刻度标签 */}
+          <text x="10" y="16" textAnchor="end" fontSize="7" fill="rgba(255,255,255,0.15)" dominantBaseline="middle">😊</text>
+          <text x="10" y="62" textAnchor="end" fontSize="7" fill="rgba(255,255,255,0.15)" dominantBaseline="middle">😢</text>
         </svg>
       </div>
     </div>
