@@ -5,7 +5,7 @@ import DOMPurify from 'dompurify'
 import { ArrowLeft, Sparkles, Send, Loader2, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
 import { analyzeEmotion, getWellnessTips } from '../services/emotionAnalyzer'
 import { saveRecordAsync, getAllRecordsAsync } from '../services/storage'
-import { MOOD_TYPES, getMoodColor, getMoodBgClass, getMoodList } from '../utils/moodUtils'
+import { MOOD_TYPES, getMoodColor, getMoodBgClass, getMoodList, getMoodLabel } from '../utils/moodUtils'
 import { submitMoodStat } from '../services/apiService'
 import CaringCard from '../components/CaringCard'
 import { t, formatDateLocalized } from '../i18n'
@@ -121,7 +121,7 @@ export default function RecordPage() {
       text: clean,
       mood: result.mood,
       intensity: result.intensity,
-      moodLabel: MOOD_TYPES[result.mood]?.label,
+      moodLabel: getMoodLabel(result.mood),
       suggestion: result.suggestion,
       keywords: result.keywords,
       analysis: result.analysis,
@@ -358,7 +358,7 @@ export default function RecordPage() {
           <div
             className={`rounded-2xl p-5 mb-4 border ${getMoodBgClass(result.mood)}`}
             role="status"
-            aria-label={`${MOOD_TYPES[result.mood]?.label}，${t('record.intensity')} ${result.intensity}`}
+            aria-label={`${getMoodLabel(result.mood)}，${t('record.intensity')} ${result.intensity}`}
           >
             <div className="flex items-center gap-4 mb-4">
               <div
@@ -369,7 +369,7 @@ export default function RecordPage() {
                 {MOOD_TYPES[result.mood]?.emoji}
               </div>
               <div>
-                <p className="text-2xl font-bold theme-text">{MOOD_TYPES[result.mood]?.label}</p>
+                <p className="text-2xl font-bold theme-text">{getMoodLabel(result.mood)}</p>
                 <p className="text-sm theme-text-secondary mt-1">
                   {t('record.intensity')}: {'★'.repeat(result.intensity)}{'☆'.repeat(5 - result.intensity)}
                 </p>
@@ -468,12 +468,12 @@ function MoodButton({ mood, onSelect }) {
     <button
       onClick={handleClick}
       className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all active:scale-95 ${mood.bgClass} hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-pink-400/50`}
-      aria-label={t('aria.selectMood').replace('{label}', mood.label)}
+      aria-label={t('aria.selectMood').replace('{label}', getMoodLabel(mood.key))}
     >
       <span className={`text-lg ${bouncing ? 'animate-emoji-bounce' : ''}`} aria-hidden="true">
         {mood.emoji}
       </span>
-      <span className="text-sm">{mood.label}</span>
+      <span className="text-sm">{getMoodLabel(mood.key)}</span>
     </button>
   )
 }

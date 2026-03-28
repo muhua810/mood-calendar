@@ -168,7 +168,7 @@ export default function StatsPage() {
     const pieData = Object.entries(moodCounts)
       .filter(([, count]) => count > 0)
       .map(([key, count]) => ({
-        name: MOOD_TYPES[key]?.label || key,
+        name: getMoodLabel(key),
         value: count,
         color: MOOD_COLORS[key],
         key,
@@ -225,7 +225,7 @@ export default function StatsPage() {
     const pie = Object.entries(source.moods)
       .filter(([, count]) => count > 0)
       .map(([key, count]) => ({
-        name: MOOD_TYPES[key]?.label || key,
+        name: getMoodLabel(key),
         value: count,
         color: MOOD_COLORS[key],
       }))
@@ -870,7 +870,7 @@ function AnnualReport({ records, navigate }) {
       count,
       pct: count / yearRecords.length,
       color: MOOD_TYPES[key]?.color,
-      label: MOOD_TYPES[key]?.label,
+      label: getMoodLabel(key),
       emoji: MOOD_TYPES[key]?.emoji,
     }))
 
@@ -1010,7 +1010,7 @@ function AnnualReport({ records, navigate }) {
                   const maxIdx = pcts.indexOf(Math.max(...pcts))
                   pcts[maxIdx] += diff
                   const idx = keys.indexOf(name)
-                  return [`${pcts[idx]}%`, MOOD_TYPES[name]?.label || name]
+                  return [`${pcts[idx]}%`, getMoodLabel(name)]
                 }}
               />
               <Area type="monotone" dataKey="very_positive" stackId="1" stroke="none" fill="#6366f1" fillOpacity={0.8} />

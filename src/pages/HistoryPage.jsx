@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Search, Calendar, ChevronRight } from 'lucide-react'
 import { format } from 'date-fns'
 import { getAllRecords } from '../services/storage'
-import { MOOD_TYPES, getMoodColor } from '../utils/moodUtils'
+import { MOOD_TYPES, getMoodColor, getMoodLabel } from '../utils/moodUtils'
 import { t, formatMonthLabel } from '../i18n'
 
 export default function HistoryPage() {
@@ -155,7 +155,7 @@ export default function HistoryPage() {
                             color: getMoodColor(record.mood),
                           }}
                         >
-                          {MOOD_TYPES[record.mood]?.label}
+                          {getMoodLabel(record.mood)}
                         </span>
                       </div>
                     </div>
