@@ -93,7 +93,7 @@ function HeatmapCell({
         fill="transparent"
         className="heatmap-hit-area"
         role="gridcell"
-        aria-label={`${displayDate}${record ? '，' + moodLabel : '，未记录'}`}
+        aria-label={`${displayDate}${record ? ', ' + moodLabel : ', ' + t('heatmap.unrecorded')}`}
         tabIndex={isFuture ? -1 : 0}
         onMouseEnter={() => onHover(dateStr)}
         onMouseLeave={onBlur}
@@ -249,7 +249,7 @@ export default function HeatmapCalendar({ records = [], year: initialYear, onDay
     <div
       className="relative group"
       role="img"
-      aria-label={`${year}年情绪热力图日历`}
+      aria-label={t('heatmap.aria.calendar').replace('{year}', year)}
     >
       {/* 渐变遮罩 */}
       <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[var(--theme-card)] to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-60" />
@@ -323,7 +323,7 @@ export default function HeatmapCalendar({ records = [], year: initialYear, onDay
               width={svgWidth}
               height={7 * totalSize + cellGap}
               role="grid"
-              aria-label={`${year}年每日情绪记录`}
+              aria-label={t('heatmap.aria.dailyRecords').replace('{year}', year)}
               style={{ touchAction: 'pan-x' }}
             >
               {weeks.map((week, weekIdx) =>
@@ -368,11 +368,11 @@ export default function HeatmapCalendar({ records = [], year: initialYear, onDay
           <div className="flex items-center gap-3 mt-3 ml-8 text-xs theme-text-secondary flex-wrap" aria-label={t('heatmap.legend')}>
             <span className="theme-text-tertiary">{t('heatmap.legend')}</span>
             {[
-              { color: '#ef4444', label: '非常低落' },
-              { color: '#f97316', label: '有点难过' },
-              { color: '#eab308', label: '一般般' },
-              { color: '#22c55e', label: '心情不错' },
-              { color: '#6366f1', label: '超级开心' },
+              { color: '#ef4444', label: t('heatmap.legend.veryLow') },
+              { color: '#f97316', label: t('heatmap.legend.aBitDown') },
+              { color: '#eab308', label: t('heatmap.legend.soSo') },
+              { color: '#22c55e', label: t('heatmap.legend.prettyGood') },
+              { color: '#6366f1', label: t('heatmap.legend.superHappy') },
             ].map(({ color, label }) => (
               <span key={label} className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} aria-hidden="true" />
@@ -381,11 +381,11 @@ export default function HeatmapCalendar({ records = [], year: initialYear, onDay
             ))}
             <span className="flex items-center gap-1 ml-1">
               <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'var(--theme-border)', opacity: 0.3 }} aria-hidden="true" />
-              未记录
+              {t('heatmap.legend.unrecorded')}
             </span>
             <span className="flex items-center gap-1 ml-1">
               <div className="w-3 h-3 rounded-sm" style={{ border: '1.5px solid #6366f1' }} aria-hidden="true" />
-              今天
+              {t('heatmap.legend.today')}
             </span>
           </div>
         </div>
