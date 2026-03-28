@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { BarChart3, TrendingUp, Calendar, Award, Flame, Clock, Users, RefreshCw } from 'lucide-react'
 import { format, parseISO, subDays, isWeekend, subMonths, getDay } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
@@ -27,7 +27,8 @@ const MOOD_SCORE_MAP = {
 export default function StatsPage() {
   const [records, setRecords] = useState(() => getAllRecords())
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('overview')
+  const [searchParams] = useSearchParams()
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'overview')
   const [communityData, setCommunityData] = useState(null)
   const [communityLoading, setCommunityLoading] = useState(false)
   const [demoCommunityData, setDemoCommunityData] = useState(null)
@@ -218,7 +219,7 @@ export default function StatsPage() {
     return { pie, avg: avg.toFixed(1), total: source.total, isLocal: !communityData && !demoCommunityData, isDemo: communityData?.isDemo || demoCommunityData?.isDemo || false }
   }, [communityData, demoCommunityData, stats])
 
-  if (!stats) {
+  if (!stats && activeTab !== 'community') {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">

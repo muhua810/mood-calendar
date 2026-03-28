@@ -270,7 +270,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between text-[10px] theme-text-tertiary">
             <span>😊 {communityStats.moodPercentages?.positive || Math.round((communityStats.moods.positive / communityStats.total) * 100)}% 心情不错</span>
             <button
-              onClick={() => navigate('/stats')}
+              onClick={() => navigate('/stats?tab=community')}
               className="text-purple-400 hover:text-purple-300 transition-colors"
             >
               查看详情 →
