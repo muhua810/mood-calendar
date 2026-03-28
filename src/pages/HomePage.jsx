@@ -23,6 +23,7 @@ function useMediaQuery(query) {
     return () => mql.removeEventListener('change', handler)
   }, [query])
   return matches
+}
 
 
 /** 安全截断文本 */
