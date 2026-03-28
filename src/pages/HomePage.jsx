@@ -273,6 +273,21 @@ export default function HomePage() {
                 )
               })}
             </div>
+            {/* 颜色图例 */}
+            <div className="flex items-center justify-center gap-2.5 mb-2">
+              {[
+                { key: 'very_negative', label: '非常低落', color: '#ef4444' },
+                { key: 'negative', label: '有点难过', color: '#f97316' },
+                { key: 'neutral', label: '一般般', color: '#eab308' },
+                { key: 'positive', label: '心情不错', color: '#22c55e' },
+                { key: 'very_positive', label: '超级开心', color: '#6366f1' },
+              ].map(item => (
+                <div key={item.key} className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="text-[9px] theme-text-tertiary">{item.label}</span>
+                </div>
+              ))}
+            </div>
             <div className="flex items-center justify-between text-[10px] theme-text-tertiary">
               <span>😊 {communityStats.moodPercentages?.positive || Math.round((communityStats.moods.positive / communityStats.total) * 100)}% 心情不错</span>
               <button
