@@ -455,7 +455,7 @@ export default function StatsPage() {
                       return (
                         <div className="glass rounded-lg p-2 text-xs" style={{ minWidth: 120 }}>
                           <p className="font-medium theme-text">{d.fullDate}</p>
-                          <p className="theme-text-secondary mt-1">{moodInfo?.emoji} {moodInfo?.label}</p>
+                          <p className="theme-text-secondary mt-1">{moodInfo?.emoji} {getMoodLabel(d.mood)}</p>
                           {d.text && <p className="theme-text-tertiary mt-0.5 truncate">{d.text}</p>}
                         </div>
                       )
@@ -492,7 +492,7 @@ export default function StatsPage() {
                   <span className="text-lg w-6 text-center">{mood?.emoji}</span>
                   <div className="flex-1">
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="theme-text-secondary">{mood?.label}</span>
+                      <span className="theme-text-secondary">{getMoodLabel(key)}</span>
                       <span className="theme-text-tertiary">{t('stats.timesPercent').replace('{count}', count).replace('{pct}', pct)}</span>
                     </div>
                     <div className="h-2 rounded-full bg-white/5">
