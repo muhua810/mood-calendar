@@ -796,11 +796,11 @@ function AnnualReport({ records, navigate }) {
     mr.forEach(r => { if (counts[r.mood] !== undefined) counts[r.mood]++ })
     return {
       month: name,
-      very_negative: Math.round(counts.very_negative / total * 100),
-      negative: Math.round(counts.negative / total * 100),
-      neutral: Math.round(counts.neutral / total * 100),
-      positive: Math.round(counts.positive / total * 100),
-      very_positive: Math.round(counts.very_positive / total * 100),
+      very_negative: counts.very_negative,
+      negative: counts.negative,
+      neutral: counts.neutral,
+      positive: counts.positive,
+      very_positive: counts.very_positive,
     }
   })
 
