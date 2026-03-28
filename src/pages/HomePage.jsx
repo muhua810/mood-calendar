@@ -64,6 +64,29 @@ export default function HomePage() {
     else if (hour < 22) setGreeting('晚上好 🌆')
     else setGreeting('夜深了 🌙')
   }, [])
+  // 内置群体情绪演示数据（API 不可达时的 fallback）
+  const getDemoFallback = useCallback(() => {
+    const now = new Date()
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+    const days = {}
+    const moods = { very_negative: 0, negative: 0, neutral: 0, positive: 0, very_positive: 0 }
+    for (let d = 1; d <= Math.min(daysInMonth, now.getDate()); d++) {
+      const dayStr = String(d).padStart(2, '0')
+      const total = 80 + Math.floor(Math.random() * 30)
+      const dayMoods = {
+        very_negative: Math.floor(total * 0.03),
+        negative: Math.floor(total * 0.14),
+        neutral: Math.floor(total * 0.30),
+        positive: Math.floor(total * 0.37),
+        very_positive: Math.floor(total * 0.16),
+      }
+      days[dayStr] = { total, moods: dayMoods }
+      Object.entries(dayMoods).forEach(([k, v]) => { moods[k] += v })
+    }
+    const totalRecords = Object.values(days).reduce((s, d) => s + d.total, 0)
+    return { total: totalRecords, moods, days, isDemo: true }
+  }, [])
+
   // 加载群体情绪统计
   useEffect(() => {
     const month = new Date().toISOString().slice(0, 7)
@@ -71,10 +94,12 @@ export default function HomePage() {
       if (data && data.total > 0) {
         setCommunityStats(data)
       } else {
-        console.warn('[MoodTrace] 群体情绪数据为空或请求失败', data)
+        console.warn('[MoodTrace] API 返回空数据，使用内置演示数据')
+        setCommunityStats(getDemoFallback())
       }
     }).catch(err => {
-      console.warn('[MoodTrace] 群体情绪 API 请求异常:', err)
+      console.warn('[MoodTrace] API 请求失败，使用内置演示数据:', err?.message)
+      setCommunityStats(getDemoFallback())
     })
   }, [])
 
