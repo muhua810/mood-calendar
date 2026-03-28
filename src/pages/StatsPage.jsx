@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { BarChart3, TrendingUp, Calendar, Award, Flame, Clock, Users, RefreshCw } from 'lucide-react'
 import { format, parseISO, subDays, isWeekend, subMonths, getDay } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area, Legend
@@ -11,7 +10,7 @@ import { MOOD_TYPES, formatIntensityStars } from '../utils/moodUtils'
 import { getAllRecords, getAllRecordsAsync, getStreakDays, getMaxStreak } from '../services/storage'
 import { fetchMoodSummary } from '../services/apiService'
 import { generateDemoData } from '../services/demoData'
-import { t } from '../i18n'
+import { t, formatMonthLabel, formatDateLocalized } from '../i18n'
 
 const MOOD_COLORS = {
   very_negative: '#ef4444',
@@ -190,7 +189,7 @@ export default function StatsPage() {
       .sort(([a], [b]) => a.localeCompare(b))
       .slice(-6)
       .map(([month, data]) => ({
-        month: month.replace(/(\d{4})-(\d{2})/, '$2月'),
+        month: formatMonthLabel(parseInt(month.slice(0,4)), parseInt(month.slice(5,7))),
         avg: Number((data.sumIntensity / data.total).toFixed(1)),
         count: data.total,
         rate: Math.round((data.total / 30) * 100),
@@ -248,7 +247,7 @@ export default function StatsPage() {
           onClick={() => navigate('/record')}
           className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 text-white font-medium text-sm transition-all active:scale-95"
         >
-          去记录
+          {t('stats.noRecord')}
         </button>
       </div>
     )
@@ -292,7 +291,7 @@ export default function StatsPage() {
 
           {/* 情绪分布饼图 */}
           <div className="card p-4">
-            <h3 className="text-sm font-semibold theme-text mb-3">情绪分布</h3>
+            <h3 className="text-sm font-semibold theme-text mb-3">{t('stats.moodDist')}</h3>
             <div className="flex items-center gap-4">
               <div style={{ width: 140, height: 140 }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -319,7 +318,7 @@ export default function StatsPage() {
                         fontSize: 12,
                         color: 'var(--theme-text)',
                       }}
-                      formatter={(value, name) => [`${value}次 (${Math.round(value / stats.total * 100)}%)`, name]}
+                      formatter={(value, name) => [`${value}${t('stats.times')} (${Math.round(value / stats.total * 100)}%)`, name]}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -340,7 +339,7 @@ export default function StatsPage() {
           {stats.weekdayAvg > 0 && stats.weekendAvg > 0 && (
             <div className="card p-4">
               <h3 className="text-sm font-semibold theme-text mb-3 flex items-center gap-2">
-                <Clock size={14} className="text-blue-400" /> 工作日 vs 周末
+                <Clock size={14} className="text-blue-400" /> {t('stats.weekdayVsWeekendLabel')}
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="text-center p-3 rounded-lg bg-white/5">
@@ -406,7 +405,7 @@ export default function StatsPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm theme-text truncate">{r.text}</p>
                     <p className="text-xs theme-text-tertiary">
-                      {format(parseISO(r.date), 'M月d日', { locale: zhCN })} · {r.moodLabel}
+                      {formatDateLocalized(parseISO(r.date), 'short')} · {r.moodLabel}
                     </p>
                   </div>
                 </div>
@@ -494,7 +493,7 @@ export default function StatsPage() {
                   <div className="flex-1">
                     <div className="flex justify-between text-xs mb-1">
                       <span className="theme-text-secondary">{mood?.label}</span>
-                      <span className="theme-text-tertiary">{count}次 ({pct}%)</span>
+                      <span className="theme-text-tertiary">{t('stats.timesPercent').replace('{count}', count).replace('{pct}', pct)}</span>
                     </div>
                     <div className="h-2 rounded-full bg-white/5">
                       <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: mood?.color }} />
@@ -553,7 +552,7 @@ export default function StatsPage() {
                 <div key={month} className="card p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-semibold theme-text">
-                      {month.replace('-', '年')}月
+                      {formatMonthLabel(parseInt(month.slice(0,4)), parseInt(month.slice(5,7)))}
                     </h3>
                     <span className="text-xs theme-text-tertiary">{t('stats.recordsCount').replace('{count}', data.total)}</span>
                   </div>
@@ -613,18 +612,18 @@ export default function StatsPage() {
                   <button
                     onClick={importDemoToCommunity}
                     className="px-2.5 py-1 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 text-xs font-medium transition-colors"
-                    title="导入模拟群体数据用于演示"
+                    title={t('stats.importDemoTitle')}
                   >
-                    📊 导入演示
+                    {t('stats.importDemo')}
                   </button>
                 )}
                 {demoCommunityData && !communityData && (
                   <button
                     onClick={clearDemoCommunity}
                     className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 theme-text-tertiary text-xs transition-colors"
-                    title="清除演示数据"
+                    title={t('stats.clearDemoTitle')}
                   >
-                    清除
+                    {t('stats.clearDemo')}
                   </button>
                 )}
               </div>
@@ -634,12 +633,12 @@ export default function StatsPage() {
               <>
                 {communityChartData.isLocal && (
                   <div className="mb-3 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
-                    暂无群体数据，当前展示的是你自己的情绪分布。开启"匿名统计"后可汇聚更多人的数据。
+                    {t('stats.noCommunityHint')}
                   </div>
                 )}
                 {communityChartData.isDemo && !communityChartData.isLocal && (
                   <div className="mb-3 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300">
-                    📊 当前展示的是模拟群体数据，用于演示统计分析功能。真实使用后将展示实际汇聚数据。
+                    {t('stats.demoHint2')}
                   </div>
                 )}
                 <div className="flex items-center gap-4 mb-4">
@@ -668,7 +667,7 @@ export default function StatsPage() {
                             fontSize: 12,
                             color: 'var(--theme-text)',
                           }}
-                          formatter={(value, name) => [`${value}次`, name]}
+                          formatter={(value, name) => [`${value}${t('stats.times')}`, name]}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -684,7 +683,7 @@ export default function StatsPage() {
                     <div key={item.name} className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                       <span className="text-xs theme-text-secondary flex-1">{item.name}</span>
-                      <span className="text-xs theme-text-tertiary">{item.value}次</span>
+                      <span className="text-xs theme-text-tertiary">{item.value}{t('stats.times')}</span>
                     </div>
                   ))}
                 </div>
@@ -749,7 +748,7 @@ function AnnualReport({ records, navigate }) {
           onClick={() => navigate('/record')}
           className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white text-sm font-medium transition-all"
         >
-          写下第一笔
+          {t('annual.writeFirst')}
         </button>
       </div>
     )
@@ -796,7 +795,7 @@ function AnnualReport({ records, navigate }) {
   const recordRate = Math.round((yearRecords.length / daysInYear) * 100)
 
   // 月度趋势 + 情绪河流图数据
-  const monthLabels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+  const monthLabels = t('heatmap.months').split(',')
   const monthlyTrend = monthLabels.map((name, idx) => {
     const monthStr = String(idx + 1).padStart(2, '0')
     const mr = yearRecords.filter(r => r.date.slice(5, 7) === monthStr)
@@ -838,7 +837,7 @@ function AnnualReport({ records, navigate }) {
   const monthStories = monthLabels.map((name, idx) => {
     const monthStr = String(idx + 1).padStart(2, '0')
     const mr = yearRecords.filter(r => r.date.slice(5, 7) === monthStr)
-    if (!mr.length) return { month: name, story: '没有记录', emoji: '·', moodKey: 'neutral' }
+    if (!mr.length) return { month: name, story: t('story.noRecord'), emoji: '·', moodKey: 'neutral' }
     const avg = mr.reduce((s,r)=>s+(MOOD_TYPES[r.mood]?.intensity||3),0)/mr.length
     let story, moodKey
     if (avg >= 4.5) { story = t('story.sunny'); moodKey = 'very_positive' }
@@ -851,12 +850,12 @@ function AnnualReport({ records, navigate }) {
 
   // 年度寄语
   const getMessage = () => {
-    if (yearAvg >= 4.5) return { text: '这一年你过得太棒了！满满的正能量，愿你永远保持这份快乐和光芒。', icon: '🌟' }
-    if (yearAvg >= 4) return { text: '这一年你过得很好！多数日子里你都是快乐的，继续保持这份积极的心态~', icon: '🎉' }
-    if (yearAvg >= 3.5) return { text: '这一年总体平稳且积极，你很棒！记录让生活更有觉察力，加油！', icon: '🌱' }
-    if (yearAvg >= 3) return { text: '这一年有起有伏，这就是生活的样子。你坚持记录的情绪，就是最好的成长见证。', icon: '🌈' }
-    if (yearAvg >= 2.5) return { text: '这一年可能有些辛苦，但请记住：每一个困难的日子都在让你变得更坚强。', icon: '💙' }
-    return { text: '你经历了不少低谷，但你仍然在记录、在面对。这份勇气很珍贵，愿你被温柔以待。', icon: '💛' }
+    if (yearAvg >= 4.5) return { text: t('annualMsg.excellent'), icon: '🌟' }
+    if (yearAvg >= 4) return { text: t('annualMsg.great'), icon: '🎉' }
+    if (yearAvg >= 3.5) return { text: t('annualMsg.good'), icon: '🌱' }
+    if (yearAvg >= 3) return { text: t('annualMsg.okay'), icon: '🌈' }
+    if (yearAvg >= 2.5) return { text: t('annualMsg.tough'), icon: '💙' }
+    return { text: t('annualMsg.hard'), icon: '💛' }
   }
   const annualMsg = getMessage()
 
@@ -904,7 +903,7 @@ function AnnualReport({ records, navigate }) {
       <div className="card p-5 animate-card-flip" style={{ animationDelay: '100ms' }}>
         <h3 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-pink-400"></span>
-          年度数据总览
+          {t('stats.annualDataOverview')}
         </h3>
         <div className="grid grid-cols-2 gap-4">
           {/* 年度均分 — 带环形进度 */}
@@ -948,7 +947,7 @@ function AnnualReport({ records, navigate }) {
       <div className="card p-5 animate-card-flip" style={{ animationDelay: '200ms' }}>
         <h3 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-          年度情绪图谱
+          {t('stats.annualMoodMap')}
         </h3>
         <div className="flex items-center gap-5">
           {/* SVG 环形图 */}
@@ -971,7 +970,7 @@ function AnnualReport({ records, navigate }) {
                 {topMoodInfo?.emoji}
               </text>
               <text x={ringSize/2} y={ringSize/2 + 14} textAnchor="middle" fill="var(--theme-text-secondary)" fontSize="10">
-                年度主旋律
+                {t('stats.annualMainMood')}
               </text>
             </svg>
           </div>
@@ -1056,7 +1055,7 @@ function AnnualReport({ records, navigate }) {
       <div className="card p-5 animate-card-flip" style={{ animationDelay: '400ms' }}>
         <h3 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-          这一年的情绪故事
+          {t('stats.annualStory')}
         </h3>
         <div className="relative pl-6 space-y-4">
           {/* 时间轴线 */}
@@ -1085,14 +1084,14 @@ function AnnualReport({ records, navigate }) {
         <div className="card p-5 animate-card-flip" style={{ animationDelay: '450ms' }}>
           <h3 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
-            月度对比
+            {t('stats.monthlyCompare')}
           </h3>
           <div className="grid grid-cols-2 gap-4">
             {bestMonth && (
               <div className="p-4 rounded-xl text-center relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.02))' }}>
                 <div className="absolute inset-0 border border-green-500/20 rounded-xl" />
                 <p className="text-3xl mb-2">🌟</p>
-                <p className="text-lg font-bold text-green-400">{parseInt(bestMonth.month)}月</p>
+                <p className="text-lg font-bold text-green-400">{parseInt(bestMonth.month)}</p>
                 <p className="text-xs theme-text-tertiary mt-1">{t('annual.bestMonth')}</p>
                 <p className="text-2xl font-bold text-green-400 mt-2">{bestMonth.avg.toFixed(1)}<span className="text-xs font-normal theme-text-tertiary">/5</span></p>
               </div>
@@ -1101,7 +1100,7 @@ function AnnualReport({ records, navigate }) {
               <div className="p-4 rounded-xl text-center relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(99,102,241,0.02))' }}>
                 <div className="absolute inset-0 border border-indigo-500/20 rounded-xl" />
                 <p className="text-3xl mb-2">💙</p>
-                <p className="text-lg font-bold text-indigo-400">{parseInt(worstMonth.month)}月</p>
+                <p className="text-lg font-bold text-indigo-400">{parseInt(worstMonth.month)}</p>
                 <p className="text-xs theme-text-tertiary mt-1">{t('annual.worstMonth')}</p>
                 <p className="text-2xl font-bold text-indigo-400 mt-2">{worstMonth.avg.toFixed(1)}<span className="text-xs font-normal theme-text-tertiary">/5</span></p>
               </div>
@@ -1115,7 +1114,7 @@ function AnnualReport({ records, navigate }) {
         <div className="card p-5 animate-card-flip" style={{ animationDelay: '500ms' }}>
           <h3 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            年度关键词
+            {t('annual.keywordsTitle')}
           </h3>
           <div className="flex flex-wrap gap-2.5 items-center justify-center py-2">
             {sortedKeywords.map(([keyword, count], idx) => {
@@ -1128,7 +1127,7 @@ function AnnualReport({ records, navigate }) {
                 <span key={keyword}
                   className="inline-block px-2.5 py-1 rounded-lg cursor-default transition-all duration-200 hover:scale-110"
                   style={{ fontSize: `${size}px`, color, backgroundColor: `${color}12`, opacity: 0.65 + ratio * 0.35 }}
-                  title={`${count}次`}>
+                  title={`${count}${t('stats.times')}`}>
                   {keyword}
                 </span>
               )
