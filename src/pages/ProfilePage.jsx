@@ -16,7 +16,7 @@ function ConfirmModal({ title, message, confirmText = t('common.confirm'), cance
       <div className="glass rounded-2xl p-5 max-w-sm w-full shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-semibold theme-text">{title}</h3>
-          <button onClick={onCancel} className="p-1 rounded-lg hover:bg-white/10 theme-text-tertiary" aria-label="关闭">
+          <button onClick={onCancel} className="p-1 rounded-lg hover:bg-white/10 theme-text-tertiary" aria-label={t('aria.close')}>
             <X size={16} />
           </button>
         </div>
@@ -249,7 +249,7 @@ export default function ProfilePage() {
         <button
           onClick={() => navigate(-1)}
           className="p-2 rounded-xl hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-pink-400/50"
-          aria-label="返回"
+          aria-label={t('aria.back')}
         >
           <ArrowLeft size={20} aria-hidden="true" />
         </button>
@@ -257,7 +257,7 @@ export default function ProfilePage() {
       </div>
 
       {/* 主题切换 */}
-      <section className="glass rounded-2xl p-4 mb-4" aria-label="外观设置">
+      <section className="glass rounded-2xl p-4 mb-4" aria-label={t('aria.appearance')}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {theme === 'dark' ? (
@@ -272,7 +272,7 @@ export default function ProfilePage() {
             className="relative w-14 h-7 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-pink-400/50 bg-slate-700"
             role="switch"
             aria-checked={theme === 'dark'}
-            aria-label="切换深色/浅色模式"
+            aria-label={t('aria.toggleTheme')}
           >
             <span
               className={`absolute top-0.5 flex items-center justify-center w-6 h-6 rounded-full transition-all duration-300 ${
@@ -292,7 +292,7 @@ export default function ProfilePage() {
       </section>
 
       {/* 语言切换 */}
-      <section className="glass rounded-2xl p-4 mb-4" aria-label="语言设置">
+      <section className="glass rounded-2xl p-4 mb-4" aria-label={t('aria.language')}>
         <div className="flex items-center gap-2 mb-3">
           <Globe size={16} className="text-blue-400" aria-hidden="true" />
           <h2 className="text-sm font-medium theme-text">{t('settings.language')}</h2>
@@ -315,7 +315,7 @@ export default function ProfilePage() {
       </section>
 
       {/* AI 设置 */}
-      <section className="glass rounded-2xl p-4 mb-4" aria-label="AI 分析设置">
+      <section className="glass rounded-2xl p-4 mb-4" aria-label={t('aria.aiSettings')}>
         <div className="flex items-center gap-2 mb-4">
           <Key size={16} className="text-pink-400" aria-hidden="true" />
           <h2 className="text-sm font-medium theme-text">{t('settings.aiSettings')}</h2>
@@ -343,7 +343,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => setShowApiKey(!showApiKey)}
                 className="px-3 py-2 text-xs theme-text-tertiary hover:theme-text-secondary focus:outline-none focus:ring-2 focus:ring-pink-400/50 rounded-lg"
-                aria-label={showApiKey ? '隐藏 API Key' : '显示 API Key'}
+                aria-label={showApiKey ? t('aria.hideApiKey') : t('aria.showApiKey')}
               >
                 {showApiKey ? t('settings.hide') : t('settings.show')}
               </button>
@@ -384,7 +384,7 @@ export default function ProfilePage() {
       </section>
 
       {/* 数据管理 */}
-      <section className="glass rounded-2xl p-4 mb-4" aria-label="数据管理">
+      <section className="glass rounded-2xl p-4 mb-4" aria-label={t('aria.dataManagement')}>
         <div className="flex items-center gap-2 mb-4">
           <Database size={16} className="text-green-400" aria-hidden="true" />
           <h2 className="text-sm font-medium theme-text">{t('settings.dataManagement')}</h2>
@@ -426,7 +426,7 @@ export default function ProfilePage() {
             accept=".json"
             onChange={handleFileChange}
             className="hidden"
-            aria-label="选择要导入的 JSON 文件"
+            aria-label={t('aria.selectImportFile')}
           />
 
           <button
@@ -440,7 +440,7 @@ export default function ProfilePage() {
       </section>
 
       {/* 云端备份 */}
-      <section className="glass rounded-2xl p-4 mb-4" aria-label="云端备份">
+      <section className="glass rounded-2xl p-4 mb-4" aria-label={t('aria.cloudBackup')}>
         <div className="flex items-center gap-2 mb-4">
           <Cloud size={16} className="text-sky-400" aria-hidden="true" />
           <h2 className="text-sm font-medium theme-text">{t('settings.cloudBackup')}</h2>
@@ -456,7 +456,7 @@ export default function ProfilePage() {
             <button
               onClick={handleCopyDeviceId}
               className="flex items-center gap-1 text-xs text-sky-400 hover:text-sky-300 transition-colors"
-              aria-label="复制设备 ID"
+              aria-label={t('aria.copyDeviceId')}
             >
               <Copy size={12} /> {copied ? t('settings.copied') : t('settings.copy')}
             </button>
@@ -473,7 +473,7 @@ export default function ProfilePage() {
           >
             <div className="flex items-center gap-2">
               <CloudUpload size={14} className="text-sky-400" aria-hidden="true" />
-              <span className="text-sm theme-text">{backupLoading ? '备份中...' : '上传备份到云端'}</span>
+              <span className="text-sm theme-text">{backupLoading ? t('settings.uploading') : t('settings.uploadBackup')}</span>
             </div>
           </button>
 
@@ -484,14 +484,14 @@ export default function ProfilePage() {
           >
             <div className="flex items-center gap-2">
               <CloudDownload size={14} className="text-sky-400" aria-hidden="true" />
-              <span className="text-sm theme-text">{backupLoading ? '恢复中...' : '从云端恢复数据'}</span>
+              <span className="text-sm theme-text">{backupLoading ? t('settings.downloading') : t('settings.downloadBackup')}</span>
             </div>
           </button>
         </div>
       </section>
 
       {/* 每日提醒 */}
-      <section className="glass rounded-2xl p-4 mb-4" aria-label="每日提醒">
+      <section className="glass rounded-2xl p-4 mb-4" aria-label={t('aria.dailyReminder')}>
         <div className="flex items-center gap-2 mb-4">
           <Bell size={16} className="text-yellow-400" aria-hidden="true" />
           <h2 className="text-sm font-medium theme-text">{t('settings.dailyReminder')}</h2>
@@ -511,7 +511,7 @@ export default function ProfilePage() {
               }`}
               role="switch"
               aria-checked={reminder.enabled}
-              aria-label="开启每日提醒"
+              aria-label={t('aria.enableReminder')}
             >
               <span
                 className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
@@ -558,7 +558,7 @@ export default function ProfilePage() {
 
 
       {/* 数据加密 */}
-      <section className="glass rounded-2xl p-4 mb-4" aria-label="数据加密">
+      <section className="glass rounded-2xl p-4 mb-4" aria-label={t('aria.encryption')}>
         <div className="flex items-center gap-2 mb-3">
           <Lock size={16} className="text-emerald-400" aria-hidden="true" />
           <h2 className="text-sm font-medium theme-text">{t('settings.localEncryption')}</h2>
@@ -567,7 +567,7 @@ export default function ProfilePage() {
           {t('settings.encryptionDesc')}
         </p>
         <div className="flex items-center justify-between">
-          <span className="text-sm theme-text">{encMigrating ? '正在加密...' : '启用加密存储'}</span>
+          <span className="text-sm theme-text">{encMigrating ? t('settings.encrypting') : t('settings.enableEncryption')}</span>
           <button
             onClick={handleToggleEncryption}
             disabled={encMigrating}
@@ -576,7 +576,7 @@ export default function ProfilePage() {
             }`}
             role="switch"
             aria-checked={encryptionOn}
-            aria-label="启用数据加密"
+            aria-label={t('aria.enableEncryption')}
           >
             <span
               className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
@@ -588,7 +588,7 @@ export default function ProfilePage() {
       </section>
 
       {/* 匿名统计 */}
-      <section className="glass rounded-2xl p-4 mb-4" aria-label="匿名情绪统计">
+      <section className="glass rounded-2xl p-4 mb-4" aria-label={t('aria.anonymousStats')}>
         <div className="flex items-center gap-2 mb-3">
           <Shield size={16} className="text-cyan-400" aria-hidden="true" />
           <h2 className="text-sm font-medium theme-text">{t('settings.anonymousStats')}</h2>
@@ -609,7 +609,7 @@ export default function ProfilePage() {
             }`}
             role="switch"
             aria-checked={anonymousSubmit}
-            aria-label="开启匿名统计"
+            aria-label={t('aria.enableAnonymous')}
           >
             <span
               className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
@@ -620,7 +620,7 @@ export default function ProfilePage() {
         </div>
       </section>
       {/* 隐私说明 */}
-      <section className="glass rounded-2xl p-4 mb-4" aria-label="隐私保护">
+      <section className="glass rounded-2xl p-4 mb-4" aria-label={t('aria.privacy')}>
         <div className="flex items-center gap-2 mb-3">
           <Shield size={16} className="text-blue-400" aria-hidden="true" />
           <h2 className="text-sm font-medium theme-text">{t('settings.privacy')}</h2>
@@ -628,21 +628,21 @@ export default function ProfilePage() {
         <ul className="space-y-2 text-xs theme-text-secondary" role="list">
           <li className="flex items-start gap-2">
             <span className="text-green-400 mt-0.5" aria-hidden="true">✓</span>
-            所有数据存储在你的设备本地，不上传到任何服务器
+            {t('settings.privacyLocal')}
           </li>
           <li className="flex items-start gap-2">
             <span className="text-green-400 mt-0.5" aria-hidden="true">✓</span>
-            AI 分析时，仅发送你输入的文字到配置的 API
+            {t('settings.privacyAi')}
           </li>
           <li className="flex items-start gap-2">
             <span className="text-green-400 mt-0.5" aria-hidden="true">✓</span>
-            不收集任何个人信息或使用数据
+            {t('settings.privacyNoCollect')}
           </li>
         </ul>
       </section>
 
       {/* 心理援助 */}
-      <section className="glass rounded-2xl p-4 mb-4" aria-label="心理援助资源">
+      <section className="glass rounded-2xl p-4 mb-4" aria-label={t('aria.helpResources')}>
         <div className="flex items-center gap-2 mb-3">
           <Heart size={16} className="text-red-400" aria-hidden="true" />
           <h2 className="text-sm font-medium theme-text">{t('settings.helpResources')}</h2>
@@ -664,7 +664,7 @@ export default function ProfilePage() {
       </section>
 
       {/* 关于 */}
-      <section className="glass rounded-2xl p-4" aria-label="关于">
+      <section className="glass rounded-2xl p-4" aria-label={t('aria.about')}>
         <div className="flex items-center gap-2 mb-3">
           <Info size={16} className="theme-text-tertiary" aria-hidden="true" />
           <h2 className="text-sm font-medium theme-text">{t('settings.about')}</h2>
