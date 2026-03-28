@@ -203,7 +203,7 @@ export default function StatsPage() {
       weekdayStats[dayOfWeek].sum += MOOD_TYPES[r.mood]?.intensity || 3
       weekdayStats[dayOfWeek].count++
     })
-    const weekdayAvgData = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'].map((label, i) => ({
+    const weekdayLabels = t('heatmap.weekdays').split(','); const weekdayAvgData = (weekdayLabels.length === 7 ? weekdayLabels : ['日','一','二','三','四','五','六']).map((label, i) => ({
       day: label,
       avg: weekdayStats[i].count ? Number((weekdayStats[i].sum / weekdayStats[i].count).toFixed(1)) : 0,
       count: weekdayStats[i].count,
@@ -379,7 +379,7 @@ export default function StatsPage() {
                         fontSize: 12,
                         color: 'var(--theme-text)',
                       }}
-                      formatter={(value) => [`${value}/5`, '平均心情']}
+                      formatter={(value) => [`${value}/5`, t('stats.avgMoodLabel')]}
                     />
                     <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
                       {stats.weekdayAvgData.map((entry, index) => {
@@ -529,8 +529,8 @@ export default function StatsPage() {
                         color: 'var(--theme-text)',
                       }}
                       formatter={(value, name) => {
-                        if (name === 'avg') return [`${value}/5`, '平均心情']
-                        if (name === 'count') return [`${value}天`, '记录天数']
+                        if (name === 'avg') return [`${value}/5`, t('stats.avgMoodLabel')]
+                        if (name === 'count') return [`${value}`+t('stats.days'), t('stats.totalRecords')]
                         return [value, name]
                       }}
                     />
@@ -598,14 +598,14 @@ export default function StatsPage() {
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold theme-text flex items-center gap-2">
-                <Users size={14} className="text-cyan-400" /> {communityChartData?.isLocal ? '我的情绪总览' : communityChartData?.isDemo ? '群体情绪（演示）' : '本月群体情绪'}
+                <Users size={14} className="text-cyan-400" /> {communityChartData?.isLocal ? t('stats.communityOverview') : communityChartData?.isDemo ? t('stats.communityDemo') : t('stats.communityMonth')}
               </h3>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => loadCommunityData(true)}
                   disabled={communityLoading}
                   className="p-1.5 rounded-lg hover:bg-white/10 theme-text-tertiary hover:theme-text transition-colors"
-                  aria-label="刷新"
+                  aria-label={t('stats.refresh')}
                 >
                   <RefreshCw size={14} className={communityLoading ? 'animate-spin' : ''} />
                 </button>
@@ -675,8 +675,8 @@ export default function StatsPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-2xl font-bold theme-text">{communityChartData.avg}<span className="text-sm font-normal theme-text-tertiary">/5</span></p>
-                    <p className="text-xs theme-text-tertiary">{communityChartData.isLocal ? '我的平均心情' : '群体平均心情'}</p>
-                    <p className="text-xs theme-text-muted mt-1">{communityChartData.total} {communityChartData.isLocal ? '条记录' : '人次参与'}</p>
+                    <p className="text-xs theme-text-tertiary">{communityChartData.isLocal ? '{t('stats.myAvg')}' : '{t('stats.communityAvg')}'}</p>
+                    <p className="text-xs theme-text-muted mt-1">{communityChartData.total} {communityChartData.isLocal ? '{t('stats.records')}' : '{t('stats.communityPeople')}'}</p>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -692,8 +692,8 @@ export default function StatsPage() {
             ) : (
               <div className="text-center py-8">
                 <Users size={32} className="theme-text-muted mx-auto mb-3" />
-                <p className="text-sm theme-text-secondary mb-2">还没有数据</p>
-                <p className="text-xs theme-text-tertiary">开始记录心情后，这里会展示你的情绪分布</p>
+                <p className="text-sm theme-text-secondary mb-2">{t('stats.noData')}</p>
+                <p className="text-xs theme-text-tertiary">{t('stats.noDataDesc')}</p>
               </div>
             )}
           </div>
@@ -701,22 +701,22 @@ export default function StatsPage() {
           {/* 我 vs 群体对比 — 仅在有服务端群体数据时显示 */}
           {communityChartData && !communityChartData.isLocal && (
             <div className="card p-4">
-              <h3 className="text-sm font-semibold theme-text mb-3">我 vs 群体</h3>
+              <h3 className="text-sm font-semibold theme-text mb-3">{t('stats.myVsCommunity')}</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-3 rounded-lg bg-pink-500/10 border border-pink-500/20">
                   <p className="text-2xl font-bold text-pink-400">{stats.avgMood.toFixed(1)}</p>
-                  <p className="text-xs theme-text-tertiary mt-1">我的平均心情</p>
+                  <p className="text-xs theme-text-tertiary mt-1">{t('stats.myAvg')}</p>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
                   <p className="text-2xl font-bold text-cyan-400">{communityChartData.avg}</p>
-                  <p className="text-xs theme-text-tertiary mt-1">群体平均心情</p>
+                  <p className="text-xs theme-text-tertiary mt-1">{t('stats.communityAvg')}</p>
                 </div>
               </div>
               {Number(stats.avgMood.toFixed(1)) > Number(communityChartData.avg) && (
-                <p className="text-xs text-green-400/80 mt-3 text-center">🎉 你的心情比群体平均更好！继续保持~</p>
+                <p className="text-xs text-green-400/80 mt-3 text-center">{t('stats.meBetter')}</p>
               )}
               {Number(stats.avgMood.toFixed(1)) < Number(communityChartData.avg) && (
-                <p className="text-xs text-blue-400/80 mt-3 text-center">💙 最近可能有些低落，照顾好自己</p>
+                <p className="text-xs text-blue-400/80 mt-3 text-center">{t('stats.meWorse')}</p>
               )}
             </div>
           )}
@@ -841,11 +841,11 @@ function AnnualReport({ records, navigate }) {
     if (!mr.length) return { month: name, story: '没有记录', emoji: '·', moodKey: 'neutral' }
     const avg = mr.reduce((s,r)=>s+(MOOD_TYPES[r.mood]?.intensity||3),0)/mr.length
     let story, moodKey
-    if (avg >= 4.5) { story = '阳光灿烂的一个月'; moodKey = 'very_positive' }
-    else if (avg >= 3.8) { story = '总体愉快，充满希望'; moodKey = 'positive' }
-    else if (avg >= 3.2) { story = '平静如水，波澜不惊'; moodKey = 'neutral' }
-    else if (avg >= 2.5) { story = '有些坎坷，但依然前行'; moodKey = 'negative' }
-    else { story = '经历了一段低谷时光'; moodKey = 'very_negative' }
+    if (avg >= 4.5) { story = t('story.sunny'); moodKey = 'very_positive' }
+    else if (avg >= 3.8) { story = t('story.happy'); moodKey = 'positive' }
+    else if (avg >= 3.2) { story = t('story.calm'); moodKey = 'neutral' }
+    else if (avg >= 2.5) { story = t('story.rough'); moodKey = 'negative' }
+    else { story = t('story.low'); moodKey = 'very_negative' }
     return { month: name, story, emoji: MOOD_TYPES[moodKey]?.emoji, moodKey, avg, count: mr.length }
   })
 
@@ -1043,7 +1043,7 @@ function AnnualReport({ records, navigate }) {
               <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'var(--theme-text-tertiary)' }} axisLine={false} tickLine={false} />
               <YAxis domain={[0, 5]} tick={{ fontSize: 10, fill: 'var(--theme-text-tertiary)' }} axisLine={false} tickLine={false} width={20} />
               <Tooltip contentStyle={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', borderRadius: 8, fontSize: 12, color: 'var(--theme-text)' }}
-                formatter={(value) => [value > 0 ? `${value}/5` : '无数据', '平均心情']} />
+                formatter={(value) => [value > 0 ? `${value}/5` : '-', t('stats.avgMoodLabel')]} />
               <Area type="monotone" dataKey="avg" stroke="#c084fc" strokeWidth={2.5} fill="url(#yearGrad2)" connectNulls={false}
                 dot={{ r: 4, fill: '#c084fc', stroke: 'var(--theme-bg)', strokeWidth: 2 }}
                 activeDot={{ r: 6, stroke: '#c084fc', strokeWidth: 2, fill: 'var(--theme-bg)' }} />

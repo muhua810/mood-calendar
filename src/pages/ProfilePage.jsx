@@ -10,7 +10,7 @@ import { secureKeyGet, secureKeySet } from '../utils/crypto'
 import { getCurrentLang, setCurrentLang, getSupportedLangs, t } from '../i18n'
 
 // ── 自定义确认弹窗 ──
-function ConfirmModal({ title, message, confirmText = '确定', cancelText = '取消', danger = false, onConfirm, onCancel }) {
+function ConfirmModal({ title, message, confirmText = t('common.confirm'), cancelText = t('common.cancel'), danger = false, onConfirm, onCancel }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onCancel}>
       <div className="glass rounded-2xl p-5 max-w-sm w-full shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
@@ -345,7 +345,7 @@ export default function ProfilePage() {
                 className="px-3 py-2 text-xs theme-text-tertiary hover:theme-text-secondary focus:outline-none focus:ring-2 focus:ring-pink-400/50 rounded-lg"
                 aria-label={showApiKey ? '隐藏 API Key' : '显示 API Key'}
               >
-                {showApiKey ? '隐藏' : '显示'}
+                {showApiKey ? t('settings.hide') : t('settings.show')}
               </button>
             </div>
           </div>
@@ -378,7 +378,7 @@ export default function ProfilePage() {
             onClick={handleSaveSettings}
             className="w-full py-2.5 rounded-xl bg-pink-500 hover:bg-pink-400 text-white text-sm font-medium transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-400/50"
           >
-            {saved ? '✓ 已保存' : '保存设置'}
+            {saved ? '✓ ' + t('common.saved') : t('common.saveSettings')}
           </button>
         </div>
       </section>
@@ -400,7 +400,7 @@ export default function ProfilePage() {
             }`}
           >
             {importResult.success ? (importResult.skipped > 0 ? t('data.importSuccessSkipped').replace('{imported}', importResult.imported).replace('{skipped}', importResult.skipped) : t('data.importSuccess').replace('{imported}', importResult.imported)) : t('data.importFail') + importResult.error}
-              : `导入失败：${importResult.error}`}
+              : t('data.importFail') + importResult.error}
           </div>
         )}
 
@@ -459,7 +459,7 @@ export default function ProfilePage() {
               className="flex items-center gap-1 text-xs text-sky-400 hover:text-sky-300 transition-colors"
               aria-label="复制设备 ID"
             >
-              <Copy size={12} /> {copied ? '已复制' : '复制'}
+              <Copy size={12} /> {copied ? t('settings.copied') : t('settings.copy')}
             </button>
           </div>
           <p className="text-sm font-mono theme-text tracking-wider">{deviceId}</p>
@@ -499,7 +499,7 @@ export default function ProfilePage() {
         </div>
         <p className="text-xs theme-text-tertiary mb-4">
           {t('settings.dailyReminderDesc')}
-          {!notifSupported && ' 当前浏览器不支持系统通知，将使用页面内提醒。'}
+          {!notifSupported && ' {t('settings.noBrowserNotif')}'}
         </p>
 
         <div className="space-y-3">
@@ -551,7 +551,7 @@ export default function ProfilePage() {
 
           {notifStatus === 'denied' && (
             <p className="text-xs text-yellow-400/80">
-              通知权限已拒绝，将使用页面内提醒代替。
+              {t('settings.notifDenied')}
             </p>
           )}
         </div>

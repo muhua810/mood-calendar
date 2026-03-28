@@ -147,7 +147,7 @@ export default function RecordPage() {
       intensity: MOOD_TYPES[moodKey].intensity,
       suggestion: '',
       keywords: [],
-      analysis: '手动选择',
+      analysis: t('record.manualAnalysis'),
       confidence: 1,
       method: 'manual'
     })
