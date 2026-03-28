@@ -8,7 +8,7 @@ import { saveRecordAsync, getAllRecordsAsync } from '../services/storage'
 import { MOOD_TYPES, getMoodColor, getMoodBgClass, getMoodList } from '../utils/moodUtils'
 import { submitMoodStat } from '../services/apiService'
 import CaringCard from '../components/CaringCard'
-import { t } from '../i18n'
+import { t, formatDateLocalized } from '../i18n'
 
 export default function RecordPage() {
   const navigate = useNavigate()
@@ -107,7 +107,7 @@ export default function RecordPage() {
       // 保持 editing=true，让用户能重新保存
     } catch (e) {
       console.error('分析失败:', e)
-      setError('分析失败，请稍后重试或手动选择情绪')
+      setError(t('record.error'))
       setTimeout(() => setError(null), 4000)
     }
     setLoading(false)
@@ -219,9 +219,9 @@ export default function RecordPage() {
           >
             <CalendarDays size={14} className="theme-text-tertiary" aria-hidden="true" />
             <span className={`font-medium ${isToday ? 'text-pink-400' : 'theme-text'}`}>
-              {format(currentDate, 'yyyy年MM月dd日')}
+              {formatDateLocalized(currentDate, 'full')}
             </span>
-            {isToday && <span className="text-xs text-pink-400/70">今天</span>}
+            {isToday && <span className="text-xs text-pink-400/70">{t('record.today')}</span>}
           </button>
           {/* 隐藏的原生日期选择器 */}
           <input
