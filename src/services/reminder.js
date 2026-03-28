@@ -61,7 +61,7 @@ const REMINDER_MESSAGES = [
   '今天的心情怎么样？来记录一下吧 📝',
   '花一分钟，写一句话，记录今天的感受 💭',
   '心情需要被看见，来写今天的日记吧 🌟',
-  '今天有什么值得记录的事？来情绪日历看看 📊',
+  '今天有什么值得记录的事？来心迹看看 📊',
 ]
 
 function getRandomMessage() {
@@ -76,7 +76,7 @@ export function sendReminder() {
 
   // 优先用浏览器通知
   if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('情绪日历', {
+    new Notification('心迹', {
       body,
       icon: '/icons/icon-192.svg',
       badge: '/icons/icon-192.svg',

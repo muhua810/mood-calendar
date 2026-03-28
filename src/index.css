@@ -271,7 +271,13 @@ button:active { transform: scale(0.97); }
 .animate-count-up { animation: countUp 0.5s ease-out both; }
 .animate-page-enter { animation: pageEnter 0.35s ease-out both; }
 .animate-card-flip { animation: cardFlip 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes bounceSoft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
 .animate-float { animation: floatY 3s ease-in-out infinite; }
+.animate-bounce-soft { animation: bounceSoft 2s ease-in-out infinite; }
+.animate-gradient-shift { animation: gradientShift 3s ease infinite; }
 
 /* Staggered children */
 .stagger-children > *:nth-child(1) { animation-delay: 0ms; }

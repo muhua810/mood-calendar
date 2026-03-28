@@ -78,7 +78,7 @@ export default function Onboarding({ onComplete }) {
     <div className="min-h-screen flex items-center justify-center px-6 theme-bg">
       <div className="max-w-sm w-full text-center animate-fade-in">
         {/* Logo */}
-        <h1 className="text-2xl font-bold gradient-text mb-10">情绪日历</h1>
+        <h1 className="text-2xl font-bold gradient-text mb-10">心迹</h1>
 
         {/* Icon */}
         <div className={`w-20 h-20 rounded-3xl ${current.iconBg} flex items-center justify-center mx-auto mb-6`}>

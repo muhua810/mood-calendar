@@ -1,6 +1,6 @@
 {
-  "name": "情绪日历",
-  "short_name": "情绪日历",
+  "name": "心迹",
+  "short_name": "心迹",
   "description": "AI 驱动的情绪追踪与可视化应用",
   "start_url": ".",
   "display": "standalone",

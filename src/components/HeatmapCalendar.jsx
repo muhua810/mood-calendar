@@ -3,6 +3,21 @@ import { format, startOfYear, endOfYear, eachDayOfInterval, addDays, startOfWeek
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getMoodColor } from '../utils/moodUtils'
 
+// 响应式媒体查询 hook
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(
+    () => typeof window !== 'undefined' ? window.matchMedia(query).matches : false
+  )
+  useEffect(() => {
+    const mql = window.matchMedia(query)
+    const handler = (e) => setMatches(e.matches)
+    mql.addEventListener('change', handler)
+    setMatches(mql.matches)
+    return () => mql.removeEventListener('change', handler)
+  }, [query])
+  return matches
+}
+
 const MONTH_LABELS = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一', '十二']
 const DAY_LABELS = ['', '一', '', '三', '', '五', '']
 
@@ -148,7 +163,7 @@ export default function HeatmapCalendar({ records = [], year: initialYear, onDay
   const currentYear = new Date().getFullYear()
 
   // 响应式尺寸
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
+  const isMobile = useMediaQuery('(max-width: 639px)')
   const cellSize = isMobile ? CELL_SIZE_MOBILE : CELL_SIZE
   const cellGap = isMobile ? CELL_GAP_MOBILE : CELL_GAP
   const totalSize = isMobile ? TOTAL_SIZE_MOBILE : TOTAL_SIZE

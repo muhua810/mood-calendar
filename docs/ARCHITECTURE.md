@@ -4,7 +4,7 @@
 
 ## 1. 系统概述
 
-情绪日历（Mood Calendar）是一款面向大学生群体的情绪追踪与心理健康可视化 Web 应用。用户每天用一句话记录心情，系统自动分析情绪类型并生成热力图日历，帮助用户建立情绪觉察习惯。
+心迹（Mood Calendar）是一款面向大学生群体的情绪追踪与心理健康可视化 Web 应用。用户每天用一句话记录心情，系统自动分析情绪类型并生成热力图日历，帮助用户建立情绪觉察习惯。
 
 ### 1.1 设计理念
 
@@ -278,3 +278,19 @@ Tailwind 的 `dark:` 前缀方案需要大量重复类名。CSS 变量 + `data-t
 
 **manualChunks 策略**：将 recharts（含 d3）、react-router、date-fns、dompurify 拆为独立 vendor chunk，首次访问首页时只加载核心 bundle + HomePage，进入统计页时按需加载 charts/router/date chunk。
 
+
+### 5.4 后端 Worker 模块化架构 (v2.1.0)
+
+Worker 后端从单文件拆分为模块化结构：
+
+```
+worker/src/
+├── index.js              # 入口 + 路由表分发
+├── utils.js              # CORS、限流等公共工具
+└── routes/
+    ├── analyze.js        # AI 情绪分析代理（DeepSeek）
+    ├── stats.js          # 群体情绪统计（提交/查询/趋势/关键词）
+    └── backup.js         # 云端备份/恢复
+```
+
+**路由表设计**：index.js 仅做路由分发，每个路由处理器独立维护，职责清晰。

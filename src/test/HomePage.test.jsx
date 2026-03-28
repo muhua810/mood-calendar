@@ -32,7 +32,7 @@ describe('HomePage', () => {
 
   it('should render the page title', () => {
     renderHomePage()
-    expect(screen.getByText('情绪日历')).toBeInTheDocument()
+    expect(screen.getByText('心迹')).toBeInTheDocument()
   })
 
   it('should show today prompt when no record exists', () => {
@@ -44,7 +44,7 @@ describe('HomePage', () => {
   it('should display a greeting', () => {
     renderHomePage()
     // Header should show the app title and a time-based greeting
-    expect(screen.getByText('情绪日历')).toBeInTheDocument()
+    expect(screen.getByText('心迹')).toBeInTheDocument()
   })
 
   it('should render view mode toggle buttons', () => {

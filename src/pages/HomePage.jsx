@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, CalendarDays, LayoutGrid, Settings, Database } from 'lucide-react'
+import { Plus, CalendarDays, LayoutGrid, Settings, Database, Sparkles, Zap, TrendingUp } from 'lucide-react'
 import HeatmapCalendar from '../components/HeatmapCalendar'
 import MonthCalendar from '../components/MonthCalendar'
 import MiniTrend from '../components/MiniTrend'
@@ -8,7 +8,22 @@ import KeywordCloud from '../components/KeywordCloud'
 import { getAllRecords, getAllRecordsAsync, saveRecord } from '../services/storage'
 import { MOOD_TYPES } from '../utils/moodUtils'
 import { getLocalDateString } from '../utils/moodUtils'
+import { fetchMoodSummary } from '../services/apiService'
 import { generateDemoData, shouldAutoImportDemo } from '../services/demoData'
+// 响应式媒体查询 hook
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(
+    () => typeof window !== 'undefined' ? window.matchMedia(query).matches : false
+  )
+  useEffect(() => {
+    const mql = window.matchMedia(query)
+    const handler = (e) => setMatches(e.matches)
+    mql.addEventListener('change', handler)
+    setMatches(mql.matches)
+    return () => mql.removeEventListener('change', handler)
+  }, [query])
+  return matches
+
 
 /** 安全截断文本 */
 function truncate(str, max = 80) {
@@ -24,15 +39,17 @@ export default function HomePage() {
     } catch { return false }
   })
   // 移动端默认月视图，桌面端默认热力图
-  const [viewMode, setViewMode] = useState(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) return 'month'
-    return 'heatmap'
-  })
+  const isMobile = useMediaQuery('(max-width: 767px)')
+  const [viewMode, setViewMode] = useState('heatmap')
+  useEffect(() => {
+    if (isMobile && viewMode === 'heatmap') setViewMode('month')
+  }, [isMobile])
   const [importingDemo, setImportingDemo] = useState(false)
   const [showGuide, setShowGuide] = useState(() => {
     try { return localStorage.getItem('mood_calendar_show_guide') === 'true' } catch { return false }
   })
   const [greeting, setGreeting] = useState('')
+  const [communityStats, setCommunityStats] = useState(null)
   const navigate = useNavigate()
 
   // 根据时间设置问候语
@@ -45,6 +62,13 @@ export default function HomePage() {
     else if (hour < 18) setGreeting('下午好 ☁️')
     else if (hour < 22) setGreeting('晚上好 🌆')
     else setGreeting('夜深了 🌙')
+  }, [])
+  // 加载群体情绪统计
+  useEffect(() => {
+    const month = new Date().toISOString().slice(0, 7)
+    fetchMoodSummary(month).then(data => {
+      if (data && data.total > 0) setCommunityStats(data)
+    }).catch(() => {})
   }, [])
 
   // 初始化：异步加载（支持加密模式）
@@ -133,7 +157,7 @@ export default function HomePage() {
       {/* Header */}
       <header className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold gradient-text">情绪日历</h1>
+          <h1 className="text-xl font-bold gradient-text">心迹</h1>
           {greeting && <p className="text-xs theme-text-secondary mt-1">{greeting}</p>}
         </div>
         <div className="flex items-center gap-2">
@@ -180,6 +204,49 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* 群体情绪概览 — 前后端协作展示 */}
+      {communityStats && !isEmpty && (
+        <div className="card p-4 mb-4 animate-fade-in-up border border-purple-500/10">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-base">🌐</span>
+              <h2 className="text-sm font-semibold theme-text">今日群体情绪</h2>
+              {communityStats.isDemo && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400">模拟</span>
+              )}
+            </div>
+            <span className="text-[10px] theme-text-muted">{communityStats.total} 人次</span>
+          </div>
+          <div className="flex gap-1 h-2 rounded-full overflow-hidden mb-2" role="img" aria-label="群体情绪分布">
+            {Object.entries(communityStats.moods).map(([mood, count]) => {
+              const pct = communityStats.total > 0 ? (count / communityStats.total * 100) : 0
+              if (pct < 1) return null
+              const colors = {
+                very_negative: '#ef4444', negative: '#f97316',
+                neutral: '#eab308', positive: '#22c55e', very_positive: '#6366f1',
+              }
+              return (
+                <div
+                  key={mood}
+                  style={{ width: `${pct}%`, backgroundColor: colors[mood] }}
+                  className="rounded-full transition-all duration-500"
+                  title={`${mood}: ${Math.round(pct)}%`}
+                />
+              )
+            })}
+          </div>
+          <div className="flex items-center justify-between text-[10px] theme-text-tertiary">
+            <span>😊 {communityStats.moodPercentages?.positive || Math.round((communityStats.moods.positive / communityStats.total) * 100)}% 心情不错</span>
+            <button
+              onClick={() => navigate('/stats')}
+              className="text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              查看详情 →
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 数据量不足提示：检测到旧数据（<300天）时提示重新导入完整年份 */}
       {!isEmpty && records.length < 300 && (
         <div className="card p-4 mb-4 border border-amber-500/20 bg-amber-500/5 animate-fade-in-up">
@@ -205,28 +272,81 @@ export default function HomePage() {
 
       {/* 空状态：导入示例数据 */}
       {isEmpty && (
-        <div className="card p-6 mb-4 text-center animate-fade-in-up">
-          <div className="text-4xl mb-3">✨</div>
-          <h2 className="text-base font-semibold theme-text mb-2">欢迎使用情绪日历！</h2>
-          <p className="text-sm theme-text-secondary mb-4">
-            你可以从记录今天的心情开始，也可以导入示例数据体验功能
-          </p>
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-            <button
-              onClick={() => navigate(`/record?date=${todayStr}`)}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 text-white text-sm font-medium transition-all active:scale-95"
-            >
-              <Plus size={16} />
-              记录今天的心情
-            </button>
-            <button
-              onClick={handleImportDemo}
-              disabled={importingDemo}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 theme-text-secondary text-sm font-medium transition-all active:scale-95 disabled:opacity-50"
-            >
-              <Database size={16} />
-              {importingDemo ? '导入中...' : '导入示例数据'}
-            </button>
+        <div className="mb-6 animate-fade-in-up">
+          {/* 主体验卡片 */}
+          <div className="relative overflow-hidden rounded-2xl p-6 sm:p-8 text-center"
+            style={{
+              background: 'linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(244,114,182,0.15) 50%, rgba(99,102,241,0.1) 100%)',
+              border: '1px solid rgba(168,85,247,0.2)',
+            }}
+          >
+            {/* 背景装饰 */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none" aria-hidden="true">
+              <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full bg-purple-500/10 blur-2xl" />
+              <div className="absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-pink-500/10 blur-2xl" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-indigo-500/5 blur-3xl" />
+            </div>
+
+            <div className="relative z-10">
+              <div className="text-5xl mb-4 animate-bounce-soft">✨</div>
+              <h2 className="text-xl font-bold gradient-text mb-2">欢迎使用心迹</h2>
+              <p className="text-sm theme-text-secondary mb-1">
+                AI 驱动的情绪追踪与心理健康可视化
+              </p>
+              <p className="text-xs theme-text-tertiary mb-6">
+                每天一句话记录心情，AI 自动分析，发现情绪规律
+              </p>
+
+              {/* 核心功能亮点 */}
+              <div className="grid grid-cols-3 gap-3 mb-6 max-w-xs mx-auto">
+                <div className="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-white/5">
+                  <span className="text-lg">🤖</span>
+                  <span className="text-[10px] theme-text-secondary">AI 分析</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-white/5">
+                  <span className="text-lg">📊</span>
+                  <span className="text-[10px] theme-text-secondary">热力图</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-white/5">
+                  <span className="text-lg">🔒</span>
+                  <span className="text-[10px] theme-text-secondary">隐私保护</span>
+                </div>
+              </div>
+
+              {/* 主 CTA：一键体验完整功能 */}
+              <button
+                onClick={handleImportDemo}
+                disabled={importingDemo}
+                className="w-full max-w-xs mx-auto flex items-center justify-center gap-2.5 py-4 rounded-2xl text-white font-semibold text-base transition-all active:scale-[0.97] hover:shadow-lg hover:shadow-purple-500/20 disabled:opacity-50 mb-3"
+                style={{
+                  background: 'linear-gradient(135deg, #a855f7, #ec4899, #6366f1)',
+                  backgroundSize: '200% 200%',
+                  animation: importingDemo ? 'none' : 'gradient-shift 3s ease infinite',
+                }}
+              >
+                <Sparkles size={20} />
+                {importingDemo ? '正在导入...' : '一键体验完整功能'}
+              </button>
+              <p className="text-[10px] theme-text-muted mb-4">
+                导入 365 天模拟数据 · 热力图 · 统计 · 年度报告全部解锁
+              </p>
+
+              {/* 分隔线 */}
+              <div className="flex items-center gap-3 max-w-xs mx-auto mb-4">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-[10px] theme-text-muted">或者</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+
+              {/* 次要 CTA：自己记录 */}
+              <button
+                onClick={() => navigate(`/record?date=${todayStr}`)}
+                className="w-full max-w-xs mx-auto flex items-center justify-center gap-2 py-3 rounded-xl bg-white/10 hover:bg-white/15 theme-text text-sm font-medium transition-all active:scale-[0.98]"
+              >
+                <Plus size={16} />
+                从记录今天的心情开始
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -282,7 +402,7 @@ export default function HomePage() {
           <div className="flex items-start gap-3">
             <span className="text-2xl mt-0.5">👇</span>
             <div>
-              <p className="text-sm font-medium theme-text mb-1">你的专属情绪日历在这里！</p>
+              <p className="text-sm font-medium theme-text mb-1">你的专属心迹在这里！</p>
               <p className="text-xs theme-text-tertiary">
                 下方热力图展示了你每一天的情绪记录。点击任意日期可以查看或修改记录。试试切换年/月视图看看不同维度的情绪分布。
               </p>

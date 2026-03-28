@@ -19,5 +19,5 @@ app.get('/api/health', (req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`🍃 情绪日历后端服务运行在 http://localhost:${PORT}`)
+  console.log(`🍃 心迹后端服务运行在 http://localhost:${PORT}`)
 })
