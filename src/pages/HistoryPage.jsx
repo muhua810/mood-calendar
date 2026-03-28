@@ -4,7 +4,7 @@ import { ArrowLeft, Search, Calendar, ChevronRight } from 'lucide-react'
 import { format } from 'date-fns'
 import { getAllRecords } from '../services/storage'
 import { MOOD_TYPES, getMoodColor } from '../utils/moodUtils'
-import { t } from '../i18n'
+import { t, formatMonthLabel } from '../i18n'
 
 export default function HistoryPage() {
   const navigate = useNavigate()
@@ -90,7 +90,7 @@ export default function HistoryPage() {
             border: `1px solid ${filterMood === 'all' ? 'transparent' : 'var(--border-light)'}`,
           }}
         >
-          全部
+          {t('history.all')}
         </button>
         {Object.values(MOOD_TYPES).map(mood => (
           <button
@@ -121,9 +121,9 @@ export default function HistoryPage() {
           {groupedRecords.map(([month, records]) => (
             <div key={month}>
               <h3 className="text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>
-                {month.replace('-', '年')}月
+                {formatMonthLabel(...month.split('-').map(Number))}
                 <span className="ml-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-                  t('history.monthCount').replace('{count}', records.length)
+                  {t('history.monthCount').replace('{count}', records.length)}
                 </span>
               </h3>
               <div className="rounded-2xl overflow-hidden" style={cardStyle}>
