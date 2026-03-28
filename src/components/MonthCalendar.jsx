@@ -127,6 +127,16 @@ export default function MonthCalendar({ records = [], onDayClick }) {
           </div>
         )
       })()}
+      {/* 图例说明 */}
+      <div className="flex items-center justify-center gap-3 mt-3 pt-3 border-t border-white/5">
+        <span className="text-[10px] theme-text-muted">情绪图例：</span>
+        {Object.values(MOOD_TYPES).map(m => (
+          <div key={m.key} className="flex items-center gap-1">
+            <span className="text-xs">{m.emoji}</span>
+            <span className="text-[10px] theme-text-tertiary">{m.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
