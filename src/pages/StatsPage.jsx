@@ -786,21 +786,22 @@ function AnnualReport({ records, navigate }) {
     return { month: name, avg: Number(avg.toFixed(1)), count: mr.length }
   })
 
-  // 情绪河流图：每月各情绪占比
+  // 情绪河流图：每月各情绪原始计数（expand 自动归一化）
   const riverData = monthLabels.map((name, idx) => {
     const monthStr = String(idx + 1).padStart(2, '0')
     const mr = yearRecords.filter(r => r.date.slice(5, 7) === monthStr)
-    const total = mr.length || 1
     const counts = {}
     Object.keys(MOOD_TYPES).forEach(k => counts[k] = 0)
     mr.forEach(r => { if (counts[r.mood] !== undefined) counts[r.mood]++ })
+    // 没有记录的月份各情绪给 1，避免 expand 除零产生 NaN
+    const hasData = mr.length > 0
     return {
       month: name,
-      very_negative: counts.very_negative,
-      negative: counts.negative,
-      neutral: counts.neutral,
-      positive: counts.positive,
-      very_positive: counts.very_positive,
+      very_negative: hasData ? counts.very_negative : 1,
+      negative: hasData ? counts.negative : 1,
+      neutral: hasData ? counts.neutral : 1,
+      positive: hasData ? counts.positive : 1,
+      very_positive: hasData ? counts.very_positive : 1,
     }
   })
 
@@ -981,7 +982,18 @@ function AnnualReport({ records, navigate }) {
               <YAxis tick={{ fontSize: 9, fill: 'var(--theme-text-tertiary)' }} axisLine={false} tickLine={false} width={30} tickFormatter={v => `${Math.round(v*100)}%`} />
               <Tooltip
                 contentStyle={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', borderRadius: 10, fontSize: 11, color: 'var(--theme-text)' }}
-                formatter={(value, name) => [`${Math.round(value*100)}%`, MOOD_TYPES[name]?.label || name]}
+                formatter={(value, name, props) => {
+                  const keys = ['very_positive','positive','neutral','negative','very_negative']
+                  const raw = keys.map(k => props.payload?.[k] || 0)
+                  const sum = raw.reduce((a,b) => a+b, 0) || 1
+                  const pcts = raw.map(r => Math.round(r / sum * 100))
+                  // 补余数到最大项，确保总和=100
+                  const diff = 100 - pcts.reduce((a,b) => a+b, 0)
+                  const maxIdx = pcts.indexOf(Math.max(...pcts))
+                  pcts[maxIdx] += diff
+                  const idx = keys.indexOf(name)
+                  return [`${pcts[idx]}%`, MOOD_TYPES[name]?.label || name]
+                }}
               />
               <Area type="monotone" dataKey="very_positive" stackId="1" stroke="none" fill="#6366f1" fillOpacity={0.8} />
               <Area type="monotone" dataKey="positive" stackId="1" stroke="none" fill="#22c55e" fillOpacity={0.8} />
