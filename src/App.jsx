@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import ErrorBoundary from './components/ErrorBoundary'
 import Onboarding from './components/Onboarding'
+import { t } from './i18n'
 
 // 路由懒加载 — 首屏只加载 HomePage，其余按需加载
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -16,7 +17,7 @@ function LoadingFallback() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="animate-pulse-soft text-center">
         <div className="text-3xl mb-3">🎭</div>
-        <p className="text-sm theme-text-tertiary">加载中...</p>
+        <p className="text-sm theme-text-tertiary">{t('common.loading')}</p>
       </div>
     </div>
   )
