@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { format, addDays, subDays, isAfter, startOfDay } from 'date-fns'
 import DOMPurify from 'dompurify'
 import { ArrowLeft, Sparkles, Send, Loader2, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
-import { analyzeEmotion, getWellnessTips } from '../services/emotionAnalyzer'
+import { analyzeEmotion, getWellnessTips, learnFromFeedback } from '../services/emotionAnalyzer'
 import { saveRecordAsync, getAllRecordsAsync } from '../services/storage'
 import { MOOD_TYPES, getMoodColor, getMoodBgClass, getMoodList, getMoodLabel } from '../utils/moodUtils'
 import { submitMoodStat } from '../services/apiService'
@@ -26,6 +26,8 @@ export default function RecordPage() {
   const [showQuickJump, setShowQuickJump] = useState(false)
   const [error, setError] = useState(null)
   const [showCaring, setShowCaring] = useState(false)
+  const [showCorrection, setShowCorrection] = useState(false)
+  const [corrected, setCorrected] = useState(false)
   const dateInputRef = useRef(null)
   const quickJumpRef = useRef(null)
 
@@ -158,6 +160,25 @@ export default function RecordPage() {
       method: 'manual'
     })
     setEditing(false)
+  }
+
+  // AI 纠正：用户选择正确情绪，反馈给统计分析器增量学习
+  const handleCorrection = (moodKey) => {
+    const newIntensity = MOOD_TYPES[moodKey].intensity
+    // 用原文 + 纠正后的标签做增量学习
+    try { learnFromFeedback(text, newIntensity) } catch {}
+    setResult(prev => ({
+      ...prev,
+      mood: moodKey,
+      intensity: newIntensity,
+      analysis: t('record.corrected'),
+      confidence: 1,
+      method: 'corrected',
+    }))
+    setShowCorrection(false)
+    setCorrected(true)
+    // 负面情绪也要触发关怀
+    setShowCaring(moodKey === 'negative' || moodKey === 'very_negative')
   }
 
   const handleKeyDown = (e) => {
@@ -398,6 +419,39 @@ export default function RecordPage() {
               <p className="text-sm theme-text-secondary leading-relaxed">
                 💭 {result.analysis}
               </p>
+            )}
+
+            {/* 纠正按钮 — 仅 AI/关键词/统计分析时显示 */}
+            {!corrected && (result.method === 'ai' || result.method === 'keyword' || result.method === 'statistical') && !saved && (
+              <div className="mt-3 pt-3 border-t border-white/5">
+                {!showCorrection ? (
+                  <button
+                    onClick={() => setShowCorrection(true)}
+                    className="text-xs text-pink-400/70 hover:text-pink-400 transition-colors focus:outline-none focus:ring-2 focus:ring-pink-400/50 rounded px-1 py-0.5"
+                  >
+                    🔧 {t('record.notAccurate')}
+                  </button>
+                ) : (
+                  <div className="animate-fade-in-up">
+                    <p className="text-xs theme-text-tertiary mb-2">{t('record.correctHint')}</p>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {getMoodList().map(mood => (
+                        <button
+                          key={mood.key}
+                          onClick={() => handleCorrection(mood.key)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition-all active:scale-95 ${mood.bgClass} hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-pink-400/50`}
+                        >
+                          <span>{mood.emoji}</span>
+                          <span>{getMoodLabel(mood.key)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            {corrected && (
+              <p className="text-xs text-green-400/80 mt-2">{t('record.correctThanks')}</p>
             )}
           </div>
 

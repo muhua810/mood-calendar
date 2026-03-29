@@ -4,6 +4,8 @@ compatibility_date = "2026-03-24"
 # ⚠️ account_id 不要提交到公开仓库！通过 `wrangler deploy --account-id $CF_ACCOUNT_ID` 或环境变量传入
 # account_id = "YOUR_ACCOUNT_ID"
 
+# ⚠️ KV namespace id 仅用于本地开发绑定，生产环境通过 Cloudflare Dashboard 自动关联
+# 公开仓库中此 id 无实际危害（仍需 auth token 才能操作），但正式项目建议用 wrangler secret 管理
 kv_namespaces = [
   { binding = "MOOD_STATS", id = "0d4df27b7c3545eb8bf7f0f2ee16837b" }
 ]

@@ -47,7 +47,7 @@ function handleHealth() {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
-    if (request.method === 'OPTIONS') return handleOptions()
+    if (request.method === 'OPTIONS') return handleOptions(request)
 
     // 健康检查不限流
     if (url.pathname === '/api/health' && request.method === 'GET') return handleHealth()
