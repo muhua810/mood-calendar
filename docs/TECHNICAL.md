@@ -73,7 +73,7 @@
 │  前端 ──POST──→ 用户指定的 OpenAI 兼容 API                        │
 │  输入：用户文本 + System Prompt                                   │
 │  输出：AI JSON → sanitizeAiResult() 校验清洗                     │
-│  安全：API Key 仅存 sessionStorage，关闭浏览器即清除             │
+│  安全：API Key 经 AES-256-GCM 加密后存入 localStorage             │
 │  兼容：OpenAI / Claude / 任何 OpenAI 格式兼容接口                 │
 └────────────────────────────┬─────────────────────────────────────┘
                              │ 失败（无 Key / API 错误）
@@ -229,7 +229,7 @@
 ### 5.1 输入安全
 - 使用 DOMPurify 彻底过滤 HTML/脚本标签（`ALLOWED_TAGS: []`），防御 XSS 注入
 - 同时移除零宽字符和控制字符，防止混淆攻击
-- API Key 存储在 LocalStorage（仅限当前域名，不外传）
+- API Key 经 AES-256-GCM 加密后存入 LocalStorage（仅限当前域名，不外传）
 - AI 分析仅发送用户输入的文本，不包含其他数据
 
 ### 5.2 数据安全
@@ -274,14 +274,18 @@
 | 测试文件 | 测试数 | 覆盖内容 |
 |---------|--------|---------|
 | moodUtils.test.js | 12 | 情绪类型定义、颜色映射、文本工具函数 |
-| storage.test.js | 32 | 数据 CRUD、导入导出、统计计算、边界条件、createdAt 保留、updatedAt 设置、moodCounts 分布 |
-| emotionAnalyzer.test.js | 26 | 关键词分析准确率、否定词检测(远非/算不得)、混合情绪(虽然...但是...)、Emoji、降级策略、返回值完整性 |
-| emotionAnalyzer.edge.test.js | 12 | 边界用例：空输入、长文本、混合情绪、英文输入 |
+| moodUtils.test.js (__tests__) | 8 | 情绪类型、属性完整性、颜色映射 |
+| storage.test.js | 32 | 数据 CRUD、导入导出、统计计算、边界条件、createdAt 保留 |
+| storage.test.js (__tests__) | 12 | 基本存储操作、加密模式 |
+| emotionAnalyzer.test.js | 28 | 关键词分析、否定词检测、Emoji、降级策略、返回值完整性 |
+| emotionAnalyzer.edge.test.js | 11 | 边界用例：空输入、长文本、混合情绪、英文输入 |
+| emotionAnalyzer.test.js (__tests__) | 11 | 关键词分析、危机检测、建议生成 |
+| sarcasmAndSlang.test.js | 26 | 反讽检测（12 种模式）、网络用语（30+ 条）、危机关键词 |
 | apiService.test.js | 12 | API 调用、匿名开关、错误降级、健康检查 |
 | reminder.test.js | 7 | 提醒设置、定时检查、通知发送 |
 | HomePage.test.jsx | 7 | 页面渲染、今日卡片、视图切换、最近记录 |
 | RecordPage.test.jsx | 12 | 输入框、手动选择、字符计数、已有记录、XSS 过滤 |
-| demoData.test.js | 10 | 数据生成合理性、周末情绪倾向、字段完整性 |
+| demoData.test.js | 12 | 数据生成合理性、周末情绪倾向、字段完整性 |
 
 ### 7.3 运行测试
 ```bash
