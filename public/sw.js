@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moodtrace-v4';
+const CACHE_NAME = 'moodtrace-v5';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -7,45 +7,42 @@ const STATIC_ASSETS = [
   './icons/icon-512.svg',
 ];
 
-// API 请求超时（network-first 策略的等待时间）
+// API 请求超时
 const API_TIMEOUT_MS = 5000;
 
-// Install event — pre-cache the shell
+// Install event — pre-cache shell，激活后立即接管
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
 });
 
-// Activate event — clean old caches
+// Activate event — 清理旧缓存
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    })
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+    )
   );
   self.clients.claim();
 });
 
-// Fetch strategy:
-// - Navigation requests: network first, fallback to cached index.html
-// - Static assets (JS/CSS/fonts/images): stale-while-revalidate
-// - API requests: network only (no caching of dynamic data)
-// - Other requests: network first with cache fallback
+// 判断是否为带 hash 的构建产物（Vite 输出的 assets 目录下的文件）
+// 这类文件名包含 hash，内容不可变，可以安全使用 cache-first
+function isHashedAsset(url) {
+  return url.pathname.startsWith('/assets/') && /\.[a-f0-9]{8,}\.(js|css|woff2?|svg|png|jpg|webp)$/.test(url.pathname);
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
-  // Skip non-GET and non-http(s)
+  // 只处理 GET 和 http(s) 请求
   if (request.method !== 'GET' || !request.url.startsWith('http')) return;
 
   const url = new URL(request.url);
 
-  // API 请求：network-first，超时降级到离线响应
+  // API 请求：network-first，超时降级
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       Promise.race([
@@ -63,7 +60,25 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigation requests (HTML pages)
+  // 带 hash 的构建产物（JS/CSS/字体/图片）：cache-first
+  // 文件名含 hash = 内容不可变，缓存命中直接返回，不发网络请求
+  if (url.origin === self.location.origin && isHashedAsset(url)) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // 导航请求（HTML 页面）：network-first，失败用缓存
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -77,7 +92,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets from same origin: stale-while-revalidate
+  // 同源其他资源（未带 hash 的）：stale-while-revalidate
   if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(request).then((cached) => {
@@ -91,14 +106,13 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(() => cached);
 
-        // Return cached immediately if available, otherwise wait for network
         return cached || fetchPromise;
       })
     );
     return;
   }
 
-  // Cross-origin (e.g., Google Fonts): network first, cache fallback
+  // 跨域（如 Google Fonts）：network-first，缓存降级
   event.respondWith(
     fetch(request)
       .then((response) => {

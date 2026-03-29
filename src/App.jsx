@@ -1,4 +1,4 @@
-import { useState, Suspense, lazy } from 'react'
+import { useState, Suspense, lazy, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -11,6 +11,11 @@ const RecordPage = lazy(() => import('./pages/RecordPage'))
 const StatsPage = lazy(() => import('./pages/StatsPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
+
+// 预取函数：调用 import() 会触发浏览器缓存该 chunk
+const prefetchRecord = () => import('./pages/RecordPage')
+const prefetchStats = () => import('./pages/StatsPage')
+const prefetchProfile = () => import('./pages/ProfilePage')
 
 function LoadingFallback() {
   return (
@@ -27,6 +32,17 @@ export default function App() {
   const [onboarded, setOnboarded] = useState(
     () => localStorage.getItem('mood_calendar_onboarded') === 'true'
   )
+
+  // 首屏加载完成后，空闲时预取其他路由 chunk
+  // 这样用户第一次点 tab 时资源已在缓存中，秒开
+  useEffect(() => {
+    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 2000))
+    idle(() => {
+      prefetchRecord()
+      prefetchStats()
+      prefetchProfile()
+    })
+  }, [])
 
   if (!onboarded) {
     return <Onboarding onComplete={() => setOnboarded(true)} />
