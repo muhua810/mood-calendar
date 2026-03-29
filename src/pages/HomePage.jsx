@@ -6,6 +6,7 @@ import HeatmapCalendar from '../components/HeatmapCalendar'
 import MonthCalendar from '../components/MonthCalendar'
 import MiniTrend from '../components/MiniTrend'
 import KeywordCloud from '../components/KeywordCloud'
+import InsightCard from '../components/InsightCard'
 import { getAllRecords, getAllRecordsAsync, saveRecord } from '../services/storage'
 import { MOOD_TYPES, getMoodLabel } from '../utils/moodUtils'
 import { getLocalDateString } from '../utils/moodUtils'
@@ -429,6 +430,9 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* 洞察卡片 — 主动关怀 */}
+      {!isEmpty && <InsightCard />}
 
       {/* 迷你7天趋势 */}
       {!isEmpty && <MiniTrend records={records} />}

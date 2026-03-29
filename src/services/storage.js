@@ -67,6 +67,9 @@ function generateId() {
 /**
  * 获取所有记录（同步）— 优先使用内存缓存
  * 加密模式下，如果缓存可用则返回缓存；否则返回空数组并打印警告
+ *
+ * ⚠️ 注意：加密模式下请优先使用 getAllRecordsAsync()
+ * 此同步方法在加密模式且缓存未初始化时会返回空数组
  */
 export function getAllRecords() {
   try {
@@ -77,7 +80,7 @@ export function getAllRecords() {
       const data = localStorage.getItem(STORAGE_KEY)
       if (!data) return []
       if (isLikelyEncrypted(data)) {
-        console.warn('数据已加密，请先调用 getAllRecordsAsync() 初始化缓存')
+        console.warn('[MoodTrace] 数据已加密，请先调用 getAllRecordsAsync() 初始化缓存。同步读取将返回空数组。')
         return []
       }
       return JSON.parse(data)
@@ -87,7 +90,8 @@ export function getAllRecords() {
     const data = localStorage.getItem(STORAGE_KEY)
     if (!data) return []
     return JSON.parse(data)
-  } catch {
+  } catch (e) {
+    console.error('[MoodTrace] getAllRecords() 读取失败:', e)
     return []
   }
 }

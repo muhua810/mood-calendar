@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mood-calendar-v3';
+const CACHE_NAME = 'moodtrace-v4';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,9 @@ const STATIC_ASSETS = [
   './icons/icon-192.svg',
   './icons/icon-512.svg',
 ];
+
+// API 请求超时（network-first 策略的等待时间）
+const API_TIMEOUT_MS = 5000;
 
 // Install event — pre-cache the shell
 self.addEventListener('install', (event) => {
@@ -42,9 +45,21 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // API 请求：不缓存，始终走网络
+  // API 请求：network-first，超时降级到离线响应
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(fetch(request).catch(() => new Response('{"error":"offline"}', { status: 503 })));
+    event.respondWith(
+      Promise.race([
+        fetch(request),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('API timeout')), API_TIMEOUT_MS)
+        ),
+      ]).catch(() =>
+        new Response(JSON.stringify({ error: 'offline', message: '网络不可用' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      )
+    );
     return;
   }
 

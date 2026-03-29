@@ -1,6 +1,6 @@
 # 心迹 — 技术文档
 
-> **当前版本**: v2.1.2 | **更新日期**: 2026-03-29
+> **当前版本**: v2.1.3 | **更新日期**: 2026-03-29
 
 ## 一、文档说明
 
@@ -206,9 +206,57 @@
 // 返回连续记录天数
 ```
 
-## 四、PWA 实现
+## 四、情绪洞察引擎
 
-### 4.1 Service Worker 缓存策略
+### 6.1 设计理念
+
+主动发现用户可能需要关怀的情绪模式，而非被动等待用户求助。洞察引擎在首页自动运行，基于历史记录进行多维度分析。
+
+### 6.2 检测维度
+
+| 模式 | 触发条件 | 严重程度 |
+|------|---------|---------|
+| 情绪连续下降 | 最近 3-5 天情绪得分持续递减 | high/medium/low |
+| 压力关键词异常 | 14 天内出现 3+ 次压力相关词 | high/medium |
+| 记录间隔增大 | 当前间隔 > 平均间隔 × 3 且 ≥ 3 天 | high/medium |
+| 周期性低落 | 某星期几平均分 ≤ 2.8（需 14+ 数据） | medium/low |
+| 积极改善 | 近 3 天均分比前 3 天高 ≥ 1.0 | low |
+| 里程碑 | 连续记录达 7/14/30/60/100/180/365 天 | low |
+
+### 6.3 展示规则
+- 最多同时展示 2 条（避免信息过载）
+- 按严重程度排序：high > medium > low
+- 支持单条关闭，当日不再提醒
+- 压力关键词库：考试、面试、加班、deadline、论文、答辩、分手、吵架、失眠等 20+
+
+```javascript
+// 主入口
+import { runInsightAnalysis } from './services/insightEngine'
+const insights = runInsightAnalysis() // → [{ type, severity, message, data }]
+```
+
+## 五、错误监控
+
+### 5.1 功能
+- 全局 JS 运行时错误捕获（`window.error`）
+- 未处理 Promise rejection 捕获
+- 错误队列持久化（localStorage，最多 50 条）
+- 支持手动捕获和导出错误报告 JSON
+
+### 5.2 使用方式
+```javascript
+// main.jsx 初始化（自动）
+import { initErrorMonitor } from './services/errorMonitor'
+initErrorMonitor()
+
+// 手动捕获
+import { captureError } from './services/errorMonitor'
+captureError(err, { context: 'record-save' })
+```
+
+## 六、PWA 实现
+
+### 6.1 Service Worker 缓存策略
 
 采用**分层缓存策略**，针对不同类型资源使用不同策略：
 
@@ -218,13 +266,13 @@
 | 静态资源 (JS/CSS/字体) | Stale-While-Revalidate | 立即返回缓存，后台更新 |
 | 跨域资源 (Google Fonts) | Network First | 优先网络，缓存兜底 |
 
-### 4.2 Web App Manifest
+### 6.2 Web App Manifest
 - 支持安装到主屏幕
 - 独立窗口模式（standalone）
 - 自定义主题色和启动画面
 - SVG 图标（192px + 512px）
 
-## 五、安全设计
+## 七、安全设计
 
 ### 5.1 输入安全
 - 使用 DOMPurify 彻底过滤 HTML/脚本标签（`ALLOWED_TAGS: []`），防御 XSS 注入
@@ -252,7 +300,7 @@
 - intensity 字段范围校验（1-5）
 - keywords 数组截断（最多 5 个）
 
-## 六、无障碍设计
+## 八、无障碍设计
 
 - 语义化 HTML 标签（section、nav、main、article 等）
 - ARIA 属性（aria-label、aria-current、aria-live、role 等）
@@ -262,14 +310,14 @@
 - 错误和状态变化使用 role="alert" 通知屏幕阅读器
 - 热力图格子提供 aria-label 描述日期和情绪状态
 
-## 七、测试
+## 九、测试
 
-### 7.1 测试框架
+### 9.1 测试框架
 - **Vitest** — Vite 原生测试框架，速度快
 - **@testing-library/react** — React 组件测试
 - **jsdom** — 浏览器环境模拟
 
-### 7.2 测试覆盖
+### 9.2 测试覆盖
 
 | 测试文件 | 测试数 | 覆盖内容 |
 |---------|--------|---------|
@@ -287,13 +335,13 @@
 | RecordPage.test.jsx | 12 | 输入框、手动选择、字符计数、已有记录、XSS 过滤 |
 | demoData.test.js | 12 | 数据生成合理性、周末情绪倾向、字段完整性 |
 
-### 7.3 运行测试
+### 9.3 运行测试
 ```bash
 npm test              # 运行一次
 npm run test:watch    # 监听模式
 ```
 
-## 八、部署方案
+## 十、部署方案
 
 - **开发**: `npm run dev` 本地开发服务器（port 3000）
 - **测试**: `npm test` 运行单元测试

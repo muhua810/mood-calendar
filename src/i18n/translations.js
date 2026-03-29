@@ -415,6 +415,7 @@ const translations = {
     'common.back': '返回',
     'common.yesterday': '昨天',
     'common.close': '关闭',
+    'insight.title': '情绪洞察',
 
     // aria-label 与无障碍
     'aria.close': '关闭',
@@ -841,6 +842,7 @@ const translations = {
     'common.back': 'Back',
     'common.yesterday': 'Yesterday',
     'common.close': 'Close',
+    'insight.title': 'Mood Insight',
 
     'aria.close': 'Close',
     'aria.back': 'Back',
@@ -1263,6 +1265,7 @@ const translations = {
     'common.back': '戻る',
     'common.yesterday': '昨日',
     'common.close': '閉じる',
+    'insight.title': '感情インサイト',
 
     'aria.close': '閉じる',
     'aria.back': '戻る',
@@ -1664,6 +1667,7 @@ const translations = {
     'common.back': '뒤로',
     'common.yesterday': '어제',
     'common.close': '닫기',
+    'insight.title': '감정 인사이트',
 
     'aria.close': '닫기',
     'aria.back': '뒤로',
@@ -2064,6 +2068,7 @@ const translations = {
     'common.back': 'Retour',
     'common.yesterday': 'Hier',
     'common.close': 'Fermer',
+    'insight.title': 'Aperçu émotionnel',
 
     'aria.close': 'Fermer',
     'aria.back': 'Retour',
@@ -2465,6 +2470,7 @@ const translations = {
     'common.back': 'Volver',
     'common.yesterday': 'Ayer',
     'common.close': 'Cerrar',
+    'insight.title': 'Perspectiva emocional',
 
     'aria.close': 'Cerrar',
     'aria.back': 'Volver',

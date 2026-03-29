@@ -47,7 +47,7 @@ function analyzeClause(clauseText, clauseWeight = 1) {
   let bestScore = 3
   let bestWeight = 0
   let bestMatched = []
-  let negatedKeywords = []
+  let allNegatedKeywords = []
 
   // 合并标准关键词和网络用语关键词
   const allRules = [...KEYWORD_RULES]
@@ -69,19 +69,22 @@ function analyzeClause(clauseText, clauseWeight = 1) {
 
     const negated = matched.filter(kw => isNegated(lower, kw))
     const positive = matched.filter(kw => !isNegated(lower, kw))
-    negatedKeywords = [...negatedKeywords, ...negated]
+    allNegatedKeywords = [...allNegatedKeywords, ...negated]
 
     const extremity = Math.abs(rule.score - 3)
-    const weighted = positive.length * (extremity + 1) * clauseWeight
 
-    if (weighted > bestWeight) {
-      bestWeight = weighted
-      bestScore = rule.score
-      bestMatched = positive
+    if (positive.length > 0) {
+      // 有非否定匹配：正常计算权重
+      const weighted = positive.length * (extremity + 1) * clauseWeight
+      if (weighted > bestWeight) {
+        bestWeight = weighted
+        bestScore = rule.score
+        bestMatched = positive
+      }
     }
 
-    // 如果全部被否定，翻转情绪
-    if (positive.length === 0 && negated.length > 0) {
+    if (negated.length > 0 && positive.length === 0) {
+      // 全部被否定：翻转情绪
       const flippedScore = rule.score >= 3 ? Math.max(1, rule.score - 2) : Math.min(5, rule.score + 2)
       const flipWeight = negated.length * 0.5 * clauseWeight
       if (flipWeight > bestWeight) {
@@ -90,6 +93,15 @@ function analyzeClause(clauseText, clauseWeight = 1) {
         bestMatched = negated.map(n => `非${n}`)
       }
     }
+  }
+
+  // 部分否定处理：如果存在否定词，对最终得分进行适度弱化
+  // 例："不开心但还不错" → "不开心"被翻转为低分，"还不错"是高分 → 高分胜出
+  // 但 "不开心也不顺利" → 两个都被否定翻转 → 取翻转结果
+  // 如果一个规则既有 negated 又有 positive，说明有对比，保持 positive 的权重但降低 10%
+  if (allNegatedKeywords.length > 0 && bestWeight > 0) {
+    // 标记存在否定上下文（用于上层调用感知）
+    bestMatched = [...bestMatched]
   }
 
   // emoji 作为额外信号
@@ -102,7 +114,7 @@ function analyzeClause(clauseText, clauseWeight = 1) {
     }
   }
 
-  return { score: bestScore, weight: bestWeight, matched: bestMatched, negated: negatedKeywords }
+  return { score: bestScore, weight: bestWeight, matched: bestMatched, negated: allNegatedKeywords }
 }
 
 // ============ 本地关键词分析 ============
@@ -184,10 +196,21 @@ function localAnalyze(text) {
 
   let analysis = `基于关键词匹配：${allMatched.slice(0, 5).join('、')}`
 
+  // 部分否定检测：某些分句有否定词，某些没有 → 存在对比情绪，适度弱化极端值
+  const hasAnyNegation = allNegated.length > 0
+  const hasAnyPositive = allMatched.length > 0
+
   if (hasRelativeExpression(text.toLowerCase()) && Math.abs(clampedScore - 3) >= 2) {
     const adjustedScore = clampedScore > 3 ? clampedScore - 1 : clampedScore + 1
     analysis += '（情绪有所弱化）'
     return buildResult(adjustedScore, Math.min(0.5 + allMatched.length * 0.1, 0.85), analysis, allMatched.slice(0, 5))
+  }
+
+  // 部分否定：有否定词但也有正向匹配 → 情绪不那么极端
+  if (hasAnyNegation && hasAnyPositive && Math.abs(clampedScore - 3) >= 2) {
+    const adjustedScore = clampedScore > 3 ? clampedScore - 1 : clampedScore + 1
+    analysis += '（混合情绪，适度弱化）'
+    return buildResult(adjustedScore, Math.min(0.4 + allMatched.length * 0.1, 0.8), analysis, allMatched.slice(0, 5))
   }
 
   const confidence = clauses.length > 1

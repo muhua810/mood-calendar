@@ -1,6 +1,6 @@
 # 心迹 — AI 驱动的情绪追踪与心理健康可视化
 
-> 📌 **当前版本**: v2.1.2 | **更新日期**: 2026-03-29
+> 📌 **当前版本**: v2.1.3 | **更新日期**: 2026-03-29
 >
 > 🏆 **中国大学生计算机设计大赛 · 软件应用与开发赛道**参赛作品
 >
@@ -149,13 +149,22 @@ moodtrace/
 │   │   ├── aiService.js   # AI 调用服务（Workers 代理 + 用户自定义 API）
 │   │   ├── emotionAnalyzer.js  # 情绪分析主入口（四层降级编排）
 │   │   ├── statisticalAnalyzer.js  # TF-IDF + 朴素贝叶斯统计分析器
+│   │   ├── insightEngine.js  # 情绪洞察引擎（主动关怀模式检测）
+│   │   ├── errorMonitor.js  # 错误监控（全局错误捕获 + 错误队列）
 │   │   ├── storage.js     # 本地存储（支持 AES-256-GCM 加密）
 │   │   ├── backupService.js  # 云端备份/恢复
 │   │   └── apiService.js  # API 通信
 │   ├── utils/             # 工具函数（加密、情绪类型）
 │   ├── i18n/              # 国际化（翻译字典 + 工具模块，6 种语言）
 │   ├── hooks/             # 自定义 React Hooks
-│   └── contexts/          # React Context（主题切换）
+│   ├── contexts/          # React Context（主题切换）
+│   └── pages/
+│       ├── HomePage.jsx   # 首页（热力图、群体统计、洞察卡片）
+│       ├── RecordPage.jsx # 记录页
+│       ├── StatsPage.jsx  # 统计页（总览/趋势/月度/群体）
+│       ├── AnnualReport.jsx  # 年度报告（独立组件）
+│       ├── ProfilePage.jsx   # 设置页
+│       └── NotFound.jsx   # 404 页面
 ├── worker/                # Cloudflare Worker 后端
 ├── docs/                  # 项目文档 + SVG 架构图
 └── public/                # PWA 静态资源 + 图标
