@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://moodtrace.pages.dev/sitemap.xml

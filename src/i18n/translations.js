@@ -351,6 +351,8 @@ const translations = {
     'error.desc': '应用遇到了意外错误，但这不影响你的数据安全。请尝试刷新页面。',
     'error.retry': '重试',
     'error.refresh': '刷新页面',
+    'error.goHome': '回到首页',
+    'error.persistent': '多次重试仍然出错，建议清除浏览器缓存后重试。',
 
     // 热力图图例
     'heatmap.legend.veryLow': '非常低落',
@@ -780,6 +782,8 @@ const translations = {
     'error.desc': 'The app encountered an unexpected error, but your data is safe. Try refreshing the page.',
     'error.retry': 'Retry',
     'error.refresh': 'Refresh Page',
+    'error.goHome': 'Go Home',
+    'error.persistent': 'Multiple retries failed. Try clearing your browser cache.',
 
     'heatmap.legend.veryLow': 'Very Low',
     'heatmap.legend.aBitDown': 'A Bit Down',
@@ -1201,6 +1205,8 @@ const translations = {
     'error.desc': '予期しないエラーが発生しましたが、データは安全です。ページを更新してみてください。',
     'error.retry': '再試行',
     'error.refresh': 'ページを更新',
+    'error.goHome': 'ホームに戻る',
+    'error.persistent': '再試行に失敗しました。ブラウザのキャッシュをクリアしてみてください。',
 
     'heatmap.legend.veryLow': 'とても落ち込んでいる',
     'heatmap.legend.aBitDown': 'ちょっとเศรしい',
@@ -1601,6 +1607,8 @@ const translations = {
     'error.desc': '예기치 않은 오류가 발생했지만 데이터는 안전합니다. 페이지를 새로고침해 보세요.',
     'error.retry': '재시도',
     'error.refresh': '새로고침',
+    'error.goHome': '홈으로 돌아가기',
+    'error.persistent': '재시도에 실패했습니다. 브라우저 캐시를 지워보세요.',
     'heatmap.legend.veryLow': '매우 우울',
     'heatmap.legend.aBitDown': '조금 슬픔',
     'heatmap.legend.soSo': '그저 그럼',
@@ -1999,6 +2007,8 @@ const translations = {
     'error.desc': 'Une erreur inattendue s\'est produite. Essayez de rafraîchir la page.',
     'error.retry': 'Réessayer',
     'error.refresh': 'Rafraîchir',
+    'error.goHome': 'Retour à l\'accueil',
+    'error.persistent': 'Plusieurs tentatives ont échoué. Essayez de vider le cache du navigateur.',
     'heatmap.legend.veryLow': 'Très bas',
     'heatmap.legend.aBitDown': 'Un peu triste',
     'heatmap.legend.soSo': 'Bof',
@@ -2397,6 +2407,8 @@ const translations = {
     'error.desc': 'Ocurrió un error inesperado. Intenta actualizar la página.',
     'error.retry': 'Reintentar',
     'error.refresh': 'Actualizar',
+    'error.goHome': 'Volver al inicio',
+    'error.persistent': 'Varios intentos fallaron. Intenta borrar la caché del navegador.',
     'heatmap.legend.veryLow': 'Muy bajo',
     'heatmap.legend.aBitDown': 'Algo triste',
     'heatmap.legend.soSo': 'Regular',

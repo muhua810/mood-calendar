@@ -13,6 +13,9 @@ vi.mock('lucide-react', () => ({
   ChevronLeft: () => <span>←</span>,
   ChevronRight: () => <span>→</span>,
   Database: () => <span>💾</span>,
+  Sparkles: () => <span>✨</span>,
+  Zap: () => <span>⚡</span>,
+  TrendingUp: () => <span>📈</span>,
 }))
 
 function renderHomePage() {
@@ -32,7 +35,7 @@ describe('HomePage', () => {
 
   it('should render the page title', () => {
     renderHomePage()
-    expect(screen.getByText('心迹')).toBeInTheDocument()
+    expect(screen.getByText('心迹 MoodTrace')).toBeInTheDocument()
   })
 
   it('should show today prompt when no record exists', () => {
@@ -43,8 +46,8 @@ describe('HomePage', () => {
 
   it('should display a greeting', () => {
     renderHomePage()
-    // Header should show the app title and a time-based greeting
-    expect(screen.getByText('心迹')).toBeInTheDocument()
+    // Header should show the app title
+    expect(screen.getByText('心迹 MoodTrace')).toBeInTheDocument()
   })
 
   it('should render view mode toggle buttons', () => {

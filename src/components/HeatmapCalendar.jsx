@@ -3,21 +3,7 @@ import { format, startOfYear, endOfYear, eachDayOfInterval, addDays, startOfWeek
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getMoodColor, getMoodLabel } from '../utils/moodUtils'
 import { t } from '../i18n'
-
-// 响应式媒体查询 hook
-function useMediaQuery(query) {
-  const [matches, setMatches] = useState(
-    () => typeof window !== 'undefined' ? window.matchMedia(query).matches : false
-  )
-  useEffect(() => {
-    const mql = window.matchMedia(query)
-    const handler = (e) => setMatches(e.matches)
-    mql.addEventListener('change', handler)
-    setMatches(mql.matches)
-    return () => mql.removeEventListener('change', handler)
-  }, [query])
-  return matches
-}
+import { useMediaQuery } from '../hooks/useMediaQuery'
 
 const getMonthLabels = () => t('heatmap.months').split(',')
 const getDayLabels = () => t('heatmap.weekdays').split(',')

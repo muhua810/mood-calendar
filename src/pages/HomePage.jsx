@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, CalendarDays, LayoutGrid, Settings, Database, Sparkles, Zap, TrendingUp } from 'lucide-react'
 import { t, formatDateLocalized } from '../i18n'
@@ -10,21 +10,8 @@ import { getAllRecords, getAllRecordsAsync, saveRecord } from '../services/stora
 import { MOOD_TYPES, getMoodLabel } from '../utils/moodUtils'
 import { getLocalDateString } from '../utils/moodUtils'
 import { fetchMoodSummary } from '../services/apiService'
-import { generateDemoData, shouldAutoImportDemo } from '../services/demoData'
-// 响应式媒体查询 hook
-function useMediaQuery(query) {
-  const [matches, setMatches] = useState(
-    () => typeof window !== 'undefined' ? window.matchMedia(query).matches : false
-  )
-  useEffect(() => {
-    const mql = window.matchMedia(query)
-    const handler = (e) => setMatches(e.matches)
-    mql.addEventListener('change', handler)
-    setMatches(mql.matches)
-    return () => mql.removeEventListener('change', handler)
-  }, [query])
-  return matches
-}
+import { generateDemoData } from '../services/demoData'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 
 
 /** 安全截断文本 */
@@ -66,13 +53,13 @@ export default function HomePage() {
     else setGreeting(t('greeting.lateEvening'))
   }, [])
   // 内置群体情绪演示数据（API 不可达时的 fallback）— 缓存结果，刷新不随机变化
+  const demoFallbackRef = useRef(null)
   const getDemoFallback = useCallback(() => {
-    if (getDemoFallback._cached) return getDemoFallback._cached
+    if (demoFallbackRef.current) return demoFallbackRef.current
     const now = new Date()
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
     const days = {}
     const moods = { very_negative: 0, negative: 0, neutral: 0, positive: 0, very_positive: 0 }
-    // 固定分布比例，不用随机数，保证刷新一致
     const dayDistribution = [
       { very_negative: 3, negative: 13, neutral: 30, positive: 37, very_positive: 17 },
       { very_negative: 4, negative: 14, neutral: 28, positive: 38, very_positive: 16 },
@@ -87,7 +74,7 @@ export default function HomePage() {
     }
     const totalRecords = Object.values(days).reduce((s, d) => s + d.total, 0)
     const result = { total: totalRecords, moods, days, isDemo: true }
-    getDemoFallback._cached = result
+    demoFallbackRef.current = result
     return result
   }, [])
 
