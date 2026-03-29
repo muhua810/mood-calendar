@@ -64,14 +64,19 @@ export async function aiAnalyzeViaWorkers(text) {
  * 校验并清洗 AI 返回值，防止注入和异常数据
  */
 function sanitizeAiResult(raw) {
-  const moodNum = Math.max(1, Math.min(5, Math.round(Number(raw.mood) || 3)))
+  const rawMood = Number(raw.mood) || 3
+  const moodWasClamped = rawMood < 1 || rawMood > 5 || rawMood !== Math.round(rawMood)
+  const moodNum = Math.max(1, Math.min(5, Math.round(rawMood)))
   const moodKey = MOOD_KEY_MAP[moodNum]
+
+  let confidence = Math.max(0, Math.min(1, Number(raw.confidence) || 0.5))
+  if (moodWasClamped) confidence = Math.min(confidence, 0.5)
 
   return {
     mood: moodKey,
     intensity: moodNum,
     moodLabel: MOOD_TYPES[moodKey]?.label || '一般般',
-    confidence: Math.max(0, Math.min(1, Number(raw.confidence) || 0.5)),
+    confidence,
     analysis: String(raw.analysis || '').slice(0, 100),
     keywords: Array.isArray(raw.keywords)
       ? raw.keywords.map(k => String(k).slice(0, 20)).slice(0, 5)

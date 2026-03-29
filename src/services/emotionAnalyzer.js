@@ -28,7 +28,7 @@ function analyzeClause(clauseText, clauseWeight = 1) {
   // 检查中性关键词
   for (const kw of NEUTRAL_KEYWORDS) {
     if (lower.includes(kw)) {
-      return { score: 3, weight: 0.3, matched: [kw], negated: [] }
+      return { score: 3, weight: 1.2, matched: [kw], negated: [] }
     }
   }
 

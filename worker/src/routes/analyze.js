@@ -69,13 +69,17 @@ export async function handleAnalyze(request, env) {
       return corsResponse({ error: 'AI 响应格式错误' }, 502)
     }
 
-    const moodNum = Math.max(1, Math.min(5, Math.round(Number(result.mood) || 3)))
+    const rawMood = Number(result.mood) || 3
+    const moodWasClamped = rawMood !== Math.round(rawMood) || rawMood < 1 || rawMood > 5
+    const moodNum = Math.max(1, Math.min(5, Math.round(rawMood)))
+    let confidence = Math.max(0, Math.min(1, Number(result.confidence) || 0.7))
+    if (moodWasClamped) confidence = Math.min(confidence, 0.5)
 
     return corsResponse({
       mood: MOOD_MAP[moodNum],
       intensity: moodNum,
       moodLabel: MOOD_LABELS[moodNum],
-      confidence: Math.max(0, Math.min(1, Number(result.confidence) || 0.7)),
+      confidence,
       analysis: String(result.analysis || '').slice(0, 100),
       keywords: Array.isArray(result.keywords) ? result.keywords.slice(0, 5) : [],
       suggestion: String(result.suggestion || '').slice(0, 50),

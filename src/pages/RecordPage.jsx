@@ -116,29 +116,35 @@ export default function RecordPage() {
   const handleSave = async () => {
     if (!result) return
     const clean = sanitizeInput(text)
-    await saveRecordAsync({
-      date: dateParam,
-      text: clean,
-      mood: result.mood,
-      intensity: result.intensity,
-      moodLabel: getMoodLabel(result.mood),
-      suggestion: result.suggestion,
-      keywords: result.keywords,
-      analysis: result.analysis,
-      confidence: result.confidence,
-      method: result.method
-    })
-    // 提交匿名统计（静默），附带关键词用于热度排行
-    submitMoodStat({ mood: result.mood, date: dateParam, keywords: result.keywords })
-    setSaved(true)
-    // 负面情绪触发关怀卡片
-    if (result.mood === 'negative' || result.mood === 'very_negative') {
-      setShowCaring(true)
-    } else {
-      setShowCaring(false)
+    try {
+      await saveRecordAsync({
+        date: dateParam,
+        text: clean,
+        mood: result.mood,
+        intensity: result.intensity,
+        moodLabel: getMoodLabel(result.mood),
+        suggestion: result.suggestion,
+        keywords: result.keywords,
+        analysis: result.analysis,
+        confidence: result.confidence,
+        method: result.method
+      })
+      // 提交匿名统计（静默），附带关键词用于热度排行
+      submitMoodStat({ mood: result.mood, date: dateParam, keywords: result.keywords })
+      setSaved(true)
+      // 负面情绪触发关怀卡片
+      if (result.mood === 'negative' || result.mood === 'very_negative') {
+        setShowCaring(true)
+      } else {
+        setShowCaring(false)
+      }
+      // 通知其他页面数据已更新
+      window.dispatchEvent(new Event('mood-record-updated'))
+    } catch (e) {
+      console.error("保存失败:", e)
+      setError(t("record.saveError") || "保存失败，请重试")
+      setTimeout(() => setError(null), 4000)
     }
-    // 通知其他页面数据已更新
-    window.dispatchEvent(new Event('mood-record-updated'))
   }
 
   const handleManualSelect = (moodKey) => {
